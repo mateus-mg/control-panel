@@ -9,15 +9,15 @@ Bash script to manage external HD and Docker containers on a home server.
 
 ```bash
 # 1. Copy script to home (ALWAYS available)
-cp painel.sh /path/to/home/painel.sh
-chmod +x /path/to/home/painel.sh
+cp control_panel.sh /path/to/home/control_panel.sh
+chmod +x /path/to/home/control_panel.sh
 
 # 2. Create global symlink
-sudo ln -s /path/to/home/painel.sh /usr/local/bin/painel
+sudo ln -s /path/to/home/control_panel.sh /usr/local/bin/panel
 
 
 # Test
-painel status
+panel status
 ```
 
 
@@ -25,26 +25,26 @@ painel status
 
 ### Server Startup
 ```bash
-painel mount        # Mount external HD
-painel start        # Start all containers
-painel keepalive    # Keep system active (Ctrl+C to exit)
+panel mount        # Mount external HD
+panel start        # Start all containers
+panel keepalive    # Keep system active (Ctrl+C to exit)
 ```
 
 ### Server Shutdown
 ```bash
-painel stop         # Stop containers
-painel unmount      # Unmount HD
+panel stop         # Stop containers
+panel unmount      # Unmount HD
 ```
 
 ### Manage Specific Services
 ```bash
-painel services                      # List available services
-painel start jellyfin                # Start only Jellyfin
-painel start jellyfin --no-deps      # Start without dependencies
-painel stop qbittorrent              # Stop only qBittorrent
-painel restart plex                  # Restart only Plex
-painel restart plex --clean          # Restart and clean containers
-painel logs prowlarr -f              # View Prowlarr logs in real time
+panel services                      # List available services
+panel start jellyfin                # Start only Jellyfin
+panel start jellyfin --no-deps      # Start without dependencies
+panel stop qbittorrent              # Stop only qBittorrent
+panel restart plex                  # Restart only Plex
+panel restart plex --clean          # Restart and clean containers
+panel logs prowlarr -f              # View Prowlarr logs in real time
 ```
 
 
@@ -53,50 +53,50 @@ painel logs prowlarr -f              # View Prowlarr logs in real time
 ### HD Management
 | Command | Description |
 |---------|-------------|
-| `painel mount` | Mount external HD |
-| `painel unmount` | Unmount HD (stops containers first) |
-| `painel check` | Show active mounts |
-| `painel fix` | Fix mount point |
-| `painel force-mount` | Force full remount |
+| `panel mount` | Mount external HD |
+| `panel unmount` | Unmount HD (stops containers first) |
+| `panel check` | Show active mounts |
+| `panel fix` | Fix mount point |
+| `panel force-mount` | Force full remount |
 
 ### Docker Management
 | Command | Description |
 |---------|-------------|
-| `painel start [service] [--clean] [--no-deps]` | Start containers (all or specific, with options) |
-| `painel stop [service]` | Stop containers (all or specific) |
-| `painel restart [service] [--clean]` | Restart containers (all or specific, with cleanup) |
-| `painel clean [service]` | Remove orphan containers (all or specific) |
-| `painel ps` | List running containers |
-| `painel logs <service> [-f]` | Show service logs (use -f to follow) |
-| `painel stats [service]` | Show real-time CPU/memory usage |
-| `painel health` | Check health of all containers |
+| `panel start [service] [--clean] [--no-deps]` | Start containers (all or specific, with options) |
+| `panel stop [service]` | Stop containers (all or specific) |
+| `panel restart [service] [--clean]` | Restart containers (all or specific, with cleanup) |
+| `panel clean [service]` | Remove orphan containers (all or specific) |
+| `panel ps` | List running containers |
+| `panel logs <service> [-f]` | Show service logs (use -f to follow) |
+| `panel stats [service]` | Show real-time CPU/memory usage |
+| `panel health` | Check health of all containers |
 
 ### Docker Maintenance & Utilities
 | Command | Description |
 |---------|-------------|
-| `painel services` | List all available services |
-| `painel pull` | Pull updated images |
-| `painel rebuild [service] [--cache]` | Rebuild containers (NO cache by default, or with cache) |
-| `painel update-all` | Smart update: pull images, restart only updated containers |
-| `painel networks` | List Docker networks |
-| `painel volumes` | List Docker volumes |
-| `painel prune` | Remove unused resources |
-| `painel diagnose` | Detailed diagnostic (HD & Docker) |
+| `panel services` | List all available services |
+| `panel pull` | Pull updated images |
+| `panel rebuild [service] [--cache]` | Rebuild containers (NO cache by default, or with cache) |
+| `panel update-all` | Smart update: pull images, restart only updated containers |
+| `panel networks` | List Docker networks |
+| `panel volumes` | List Docker volumes |
+| `panel prune` | Remove unused resources |
+| `panel diagnose` | Detailed diagnostic (HD & Docker) |
 
 ### Monitoring
 | Command | Description |
 |---------|-------------|
-| `painel status` | Full system status |
-| `painel keepalive` | Continuous monitoring mode |
+| `panel status` | Full system status |
+| `panel keepalive` | Continuous monitoring mode |
 
 ### Log Management
 | Command | Description |
 |---------|-------------|
-| `painel view-logs [n]` | View the last `n` lines of the script log file (default: 50) |
+| `panel view-logs [n]` | View the last `n` lines of the script log file (default: 50) |
 
 ### Example: View Logs
 ```bash
-painel view-logs 100  # View the last 100 lines of the script log file
+panel view-logs 100  # View the last 100 lines of the script log file
 ```
 
 ### Updated Error Handling
@@ -108,7 +108,7 @@ painel view-logs 100  # View the last 100 lines of the script log file
 
 ### Synchronize Files and Create Symlink
 ```bash
-painel sync
+panel sync
 ```
 
 This command performs the following actions:
@@ -118,7 +118,7 @@ This command performs the following actions:
 
 ### Example
 ```bash
-painel sync  # Synchronize files and update symlink
+panel sync  # Synchronize files and update symlink
 ```
 
 
@@ -151,7 +151,7 @@ ExecStart=/usr/bin/mount UUID=your-hd-uuid /path/to/mount
 Keeps the HD active and monitors containers:
 
 ```bash
-painel keepalive
+panel keepalive
 ```
 
 - Checks HD every 30 seconds
@@ -164,36 +164,36 @@ painel keepalive
 
 ### HD does not mount
 ```bash
-painel fix           # Fix mount point
-painel force-mount   # Force mount
+panel fix           # Fix mount point
+panel force-mount   # Force mount
 lsblk                # Check device
 ```
 
 ### Containers do not start
 ```bash
-painel status                    # Check system
-painel logs <service-name>       # View logs
-painel diagnose                  # Full diagnostic
+panel status                    # Check system
+panel logs <service-name>       # View logs
+panel diagnose                  # Full diagnostic
 ```
 
 
 ## 📝 Logs
 
-Os logs do painel são armazenados no arquivo `~/.painel.log`. Cada mensagem inclui um timestamp no formato ISO (`YYYY-MM-DD HH:MM:SS`).
+The panel logs are stored in the file `~/.panel.log`. Each message includes a timestamp in ISO format (`YYYY-MM-DD HH:MM:SS`).
 
-### Exemplo de Logs
+### Example Logs
 ```log
 2025-12-20 16:31:01 - Service stopped: qbittorrent
 2025-12-20 16:35:22 - Service started: cloudflared
 ```
 
-### Rotação de Logs
-- O sistema mantém apenas as últimas 500 linhas no arquivo principal.
-- Para evitar perda de informações, recomenda-se implementar um sistema de arquivamento manual ou automático (ex.: `painel.log.1`, `painel.log.2`).
+### Log Rotation
+- The system keeps only the last 500 lines in the main file.
+- To avoid data loss, it is recommended to implement a manual or automatic archiving system (e.g., `panel.log.1`, `panel.log.2`).
 
-### Solução de Problemas com Logs
-- **Mensagens repetitivas**: Verifique se há redundância no script.
-- **Erros específicos**: Consulte as mensagens detalhadas no log para identificar falhas em comandos Docker ou montagem do HD.
+### Troubleshooting Logs
+- **Repetitive messages**: Check for redundancy in the script.
+- **Specific errors**: Consult the detailed messages in the log to identify failures in Docker commands or HD mounting.
 
 
 ## 🛠️ Original .service Configuration
