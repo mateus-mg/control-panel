@@ -1,7 +1,5 @@
 # 🎛️ Control Panel - Server Manager
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/mateus-mg/control-panel?label=release)
-
 Bash script to manage external HD and Docker containers on a home server.
 
 
