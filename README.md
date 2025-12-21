@@ -11,22 +11,12 @@ Bash script to manage external HD and Docker containers on a home server.
 
 ```bash
 # 1. Copy script to home (ALWAYS available)
-cp painel.sh /home/mateus/painel.sh
-chmod +x /home/mateus/painel.sh
+cp painel.sh /path/to/home/painel.sh
+chmod +x /path/to/home/painel.sh
 
 # 2. Create global symlink
-sudo ln -s /home/mateus/painel.sh /usr/local/bin/painel
+sudo ln -s /path/to/home/painel.sh /usr/local/bin/painel
 
-# 3. Create sync script
-# (already created at /home/mateus/sync-painel.sh)
-
-# 4. Add to crontab for sync at boot
-crontab -e
-# Add: @reboot /home/mateus/sync-painel.sh
-
-# 5. Create alias for convenience
-echo "alias sync-painel='/home/mateus/sync-painel.sh'" >> ~/.bashrc
-source ~/.bashrc
 
 # Test
 painel status
@@ -57,7 +47,6 @@ painel stop qbittorrent              # Stop only qBittorrent
 painel restart plex                  # Restart only Plex
 painel restart plex --clean          # Restart and clean containers
 painel logs prowlarr -f              # View Prowlarr logs in real time
-sync-painel                          # Sync script (after editing)
 ```
 
 
@@ -75,71 +64,91 @@ sync-painel                          # Sync script (after editing)
 ### Docker Management
 | Command | Description |
 |---------|-------------|
-| `painel start [service]` | Start containers (all or specific) |
-| `painel start [service] --no-deps` | Start without recreating dependencies |
-| `painel start [service] --clean` | Remove orphan containers before starting |
+| `painel start [service] [--clean] [--no-deps]` | Start containers (all or specific, with options) |
 | `painel stop [service]` | Stop containers (all or specific) |
-| `painel restart [service]` | Restart containers (all or specific) |
-| `painel restart [service] --clean` | Restart with orphan container cleanup |
+| `painel restart [service] [--clean]` | Restart containers (all or specific, with cleanup) |
 | `painel clean [service]` | Remove orphan containers (all or specific) |
 | `painel ps` | List running containers |
 | `painel logs <service> [-f]` | Show service logs (use -f to follow) |
 | `painel stats [service]` | Show real-time CPU/memory usage |
 | `painel health` | Check health of all containers |
 
-### Docker Maintenance
+### Docker Maintenance & Utilities
 | Command | Description |
 |---------|-------------|
 | `painel services` | List all available services |
 | `painel pull` | Pull updated images |
-| `painel rebuild [service]` | Rebuild containers (NO cache by default) |
-| `painel rebuild [service] --cache` | Rebuild with cache (faster) |
+| `painel rebuild [service] [--cache]` | Rebuild containers (NO cache by default, or with cache) |
 | `painel update-all` | Smart update: pull images, restart only updated containers |
-## 🔄 Smart Update: update-all
-
-
-The `painel update-all` command automates image updates and container restarts in a safe and efficient way:
-
-- Checks if the external HD is mounted and Docker is available
-- Pulls the latest images for all services defined in your docker-compose.yml
-- For each service, compares the Image ID (hash) of the local image (after pull) with the Image ID used by the running container (using `docker inspect`).
-- Restarts only the containers whose running image is different from the latest local image, ensuring that only truly updated containers are recreated.
-- If a container is not running, it will also be recreated to use the latest image.
-- Logs all actions and updates to `~/.painel.log`
-- Prints notifications in the terminal for each updated service
-
-**Usage:**
-
-```bash
-painel update-all
-```
-
-If no image was updated, no containers will be restarted. If one or more images were updated, only the affected containers will be restarted, minimizing downtime and unnecessary restarts.
-
-All output and logs are in English, following project conventions.
 | `painel networks` | List Docker networks |
 | `painel volumes` | List Docker volumes |
 | `painel prune` | Remove unused resources |
+| `painel diagnose` | Detailed diagnostic (HD & Docker) |
 
 ### Monitoring
 | Command | Description |
 |---------|-------------|
 | `painel status` | Full system status |
 | `painel keepalive` | Continuous monitoring mode |
-| `painel diagnose` | Detailed diagnostic |
+
+### Log Management
+| Command | Description |
+|---------|-------------|
+| `painel view-logs [n]` | View the last `n` lines of the script log file (default: 50) |
+
+### Example: View Logs
+```bash
+painel view-logs 100  # View the last 100 lines of the script log file
+```
+
+### Updated Error Handling
+- Improved error messages for better debugging.
+- Logs now include detailed context for easier troubleshooting.
+
+
+## 🔄 Sync Files
+
+### Synchronize Files and Create Symlink
+```bash
+painel sync
+```
+
+This command performs the following actions:
+1. Copies the `control_panel.sh` script and `docker-compose.yml` from the external HD to the home directory.
+2. Creates or updates a global symlink at `/usr/local/bin/panel` pointing to the script.
+3. Ensures the files are up-to-date before copying.
+
+### Example
+```bash
+painel sync  # Synchronize files and update symlink
+```
 
 
 ## ⚙️ Configuration
 
-Edit the variables at the beginning of the script:
+### HD Configuration
+Update the following variables in the script to match your system:
+
 ```bash
-HD_MOUNT_POINT="/media/mateus/Servidor"
-DOCKER_COMPOSE_DIR="/home/mateus"
-HD_DEVICE="/dev/sdb1"
+HD_MOUNT_POINT="/path/to/mount"
+HD_UUID="your-hd-uuid"
+HD_LABEL="your-hd-label"
+HD_TYPE="ext4"
+DOCKER_COMPOSE_DIR="/path/to/docker-compose"
+```
+
+### Docker Compose
+Ensure your `docker-compose.yml` file is located in the directory specified by `DOCKER_COMPOSE_DIR`.
+
+### .service File
+If using the `.service` file for automatic mounting, update the `ExecStart` line to match your HD configuration:
+
+```ini
+ExecStart=/usr/bin/mount UUID=your-hd-uuid /path/to/mount
 ```
 
 
-## 🔋 Keepalive Mode
+##  Keepalive Mode
 
 Keeps the HD active and monitors containers:
 
@@ -171,4 +180,61 @@ painel diagnose                  # Full diagnostic
 
 
 ## 📝 Logs
+
+Os logs do painel são armazenados no arquivo `~/.painel.log`. Cada mensagem inclui um timestamp no formato ISO (`YYYY-MM-DD HH:MM:SS`).
+
+### Exemplo de Logs
+```log
+2025-12-20 16:31:01 - Service stopped: qbittorrent
+2025-12-20 16:35:22 - Service started: cloudflared
+```
+
+### Rotação de Logs
+- O sistema mantém apenas as últimas 500 linhas no arquivo principal.
+- Para evitar perda de informações, recomenda-se implementar um sistema de arquivamento manual ou automático (ex.: `painel.log.1`, `painel.log.2`).
+
+### Solução de Problemas com Logs
+- **Mensagens repetitivas**: Verifique se há redundância no script.
+- **Erros específicos**: Consulte as mensagens detalhadas no log para identificar falhas em comandos Docker ou montagem do HD.
+
+
+## 🛠️ Original .service Configuration
+
+The original configuration of the `hdmount.service` file is as follows:
+
+```ini
+[Unit]
+Description=Mount external HD before Docker
+DefaultDependencies=no
+After=local-fs.target
+Before=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/mount /media/mateus/Servidor
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Instructions Before Moving
+
+1. Ensure the `.service` file is correctly configured for your system.
+2. Move the file to the systemd directory:
+   ```bash
+   sudo mv /path/to/hdmount.service /etc/systemd/system/
+   ```
+3. Reload systemd to recognize the new service:
+   ```bash
+   sudo systemctl daemon-reload
+   ```
+4. Enable the service to start on boot:
+   ```bash
+   sudo systemctl enable hdmount.service
+   ```
+5. Start the service manually to test:
+   ```bash
+   sudo systemctl start hdmount.service
+   ```
 

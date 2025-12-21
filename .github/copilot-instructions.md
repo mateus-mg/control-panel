@@ -1,12 +1,14 @@
-````instructions
-# Copilot Instructions - Painel de Controle
+````````instructions
+```````instructions
+``````instructions
+# Copilot Instructions - Control Panel
 
 ## Project Overview
-Bash script for managing external HD and Docker containers in a home server. Handles mounting/unmounting of HD and Docker operations with temporary keepalive mode. Located in `painel-controle/`.
+Bash script for managing external HD and Docker containers in a home server. Handles mounting/unmounting of HD and Docker operations with temporary keepalive mode. Located in `panel-control/`.
 
 ## Architecture
 
-**Main Script:** `painel-controle/painel.sh` (~450 lines)
+**Main Script:** `panel-control/panel.sh` (~450 lines)
 - Single bash script with modular functions
 - No external dependencies beyond standard Unix tools (mountpoint, grep, sed, docker)
 - Auto-discovers services from docker-compose.yml
@@ -21,90 +23,79 @@ Bash script for managing external HD and Docker containers in a home server. Han
 
 ## Critical Patterns
 
-**HD Configuration (Lines 7-13):**
+### HD Configuration
+Update the following variables in the script to match your system:
+
 ```bash
-HD_MOUNT_POINT="/media/mateus/Servidor"
-HD_UUID="35feb867-8ee2-49a9-a1a5-719a67e3975a"
-HD_LABEL="Servidor"
-HD_DEVICE="/dev/sdb1"
+HD_MOUNT_POINT="/path/to/mount"
+HD_UUID="your-hd-uuid"
+HD_LABEL="your-hd-label"
+HD_DEVICE="/dev/sdX"
 HD_TYPE="ext4"
-DOCKER_COMPOSE_DIR="/home/mateus"
+DOCKER_COMPOSE_DIR="/path/to/docker-compose"
 ```
 
-**Mount Verification (Lines 145-155):**
-```bash
-is_hd_mounted() {
-    if mountpoint -q "$HD_MOUNT_POINT" 2>/dev/null; then
-        return 0
-    fi
-    if grep -qs "$HD_MOUNT_POINT" /proc/mounts; then
-        return 0
-    fi
-    return 1
-}
-```
+### Mount Verification
+The `is_hd_mounted` function checks if the HD is mounted. Ensure the `HD_MOUNT_POINT` variable is correctly set to your desired mount point.
 
-**Service Auto-Discovery (Lines 25-40):**
-```bash
-# Uses docker compose config --services
-# Fallback: grep '^  [a-zA-Z0-9_-]+:' from YAML
-get_docker_services() {
-    cd "$DOCKER_COMPOSE_DIR" && docker compose config --services 2>/dev/null
-}
-```
+### Service Auto-Discovery
+The `get_docker_services` function assumes your `docker-compose.yml` file is located in the directory specified by `DOCKER_COMPOSE_DIR`. Update this variable as needed.
 
-**Keepalive Loop (Lines 235-270):**
-```bash
-# 30-second interval monitoring
-# Remounts HD on disconnect
-# Restarts stopped containers
-# Uses touch to keep HD active
-```
+### Keepalive Loop
+The keepalive loop monitors the HD and Docker containers. Adjust the monitoring interval or behavior as required for your system.
 
 ## Developer Workflows
 
 **Install globally:**
 ```bash
-sudo cp painel.sh /usr/local/bin/painel
-sudo chmod +x /usr/local/bin/painel
-painel status
+sudo cp panel.sh /usr/local/bin/panel
+sudo chmod +x /usr/local/bin/panel
+panel status
 ```
 
 **Typical startup:**
 ```bash
-painel mount           # Mount HD
-painel start           # Start all containers
-painel keepalive       # Activate monitoring (Ctrl+C to stop)
+panel mount           # Mount HD
+panel start           # Start all containers
+panel keepalive       # Activate monitoring (Ctrl+C to stop)
 ```
 
 **Service-specific operations:**
 ```bash
-painel start jellyfin      # Start only Jellyfin
-painel restart qbittorrent # Restart qBittorrent
-painel logs prowlarr -f    # Follow Prowlarr logs
+panel start jellyfin      # Start only Jellyfin
+panel restart qbittorrent # Restart qBittorrent
+panel logs prowlarr -f    # Follow Prowlarr logs
 ```
 
 ## Command Reference
 
 **HD Management:**
-- `painel mount` - Mounts external HD
-- `painel unmount` - Stops Docker, unmounts HD safely
-- `painel check` - Shows active mounts
-- `painel fix` - Recreates mount point with correct permissions
-- `painel force-mount` - Force complete remount sequence
+- `panel mount` - Mounts external HD
+- `panel unmount` - Stops Docker, unmounts HD safely
+- `panel check` - Shows active mounts
+- `panel fix` - Recreates mount point with correct permissions
+- `panel force-mount` - Force complete remount sequence
+- `panel sync` - Sync script and docker-compose.yml from HD
 
 **Docker Operations:**
-- `painel start [service]` - Start all or specific container
-- `painel stop [service]` - Stop all or specific container
-- `painel restart [service]` - Restart all or specific container
-- `painel ps` - List running containers
-- `painel logs <service>` - View service logs
-- `painel services` - List available services
+- `panel start [service] [--clean] [--no-deps]` - Start all or specific container (with options)
+- `panel stop [service]` - Stop all or specific container
+- `panel restart [service] [--clean]` - Restart all or specific container (with cleanup)
+- `panel clean [service]` - Remove orphan containers (all or specific)
+- `panel ps` - List running containers
+- `panel logs <service>` - View service logs
+- `panel services` - List available services
+- `panel pull` - Pull updated images
+- `panel rebuild [service] [--cache]` - Rebuild containers (NO cache by default, or with cache)
+- `panel update-all` - Smart update: pull images, restart only updated containers
+- `panel networks` - List Docker networks
+- `panel volumes` - List Docker volumes
+- `panel prune` - Remove unused resources
 
 **Monitoring:**
-- `painel status` - Complete system status
-- `painel keepalive` - Continuous monitoring mode
-- `painel diagnose` - Full diagnostic report
+- `panel status` - Complete system status
+- `panel keepalive` - Continuous monitoring mode
+- `panel diagnose` - Full diagnostic report
 
 ## Key Conventions
 
@@ -130,7 +121,7 @@ painel logs prowlarr -f    # Follow Prowlarr logs
 
 ## Common Issues
 
-**HD won't mount:** Check device exists (`lsblk`), fix mount point (`painel fix`), force mount (`painel force-mount`)
+**HD won't mount:** Check device exists (`lsblk`), fix mount point (`panel fix`), force mount (`panel force-mount`)
 
 **Containers won't start:** Verify HD is mounted first, check docker-compose.yml exists, review logs
 
@@ -266,4 +257,87 @@ tail -f ~/.painel.log
 - [ ] Add web interface (optional)
 - [ ] Notification system (desktop/mobile)
 
-````
+## Implemented Improvements
+
+#### Generic Functions
+1. **`validate_environment`**:
+   - Centralizes Docker environment validation and mounted HD verification.
+   - Replaces repetitive validations in multiple functions.
+
+2. **`execute_docker_compose`**:
+   - Abstracts Docker Compose command execution with prior validation.
+   - Reduces code duplication in `start_docker_services`, `stop_docker_services`, and `restart_docker_services` functions.
+
+#### Updates to Existing Functions
+- **`start_docker_services`**:
+  - Now uses `validate_environment` for initial validations.
+  - Uses `execute_docker_compose` to start services.
+
+- **`stop_docker_services`**:
+  - Replaces redundant validations and commands with calls to generic functions.
+
+- **`restart_docker_services`**:
+  - Integrates `validate_environment` and `execute_docker_compose`.
+  - Simplifies restart logic with optional cleanup.
+
+#### Benefits
+- **Reduced Redundancy**: Cleaner and easier to maintain code.
+- **Reusability**: Generic functions can be used in future implementations.
+- **Reliability**: Centralized validations reduce potential errors.
+
+## Project Rules and Guidelines
+
+### General Language Requirement
+- All project documentation, code comments, and user-facing messages must be written in English to ensure consistency and accessibility for a broader audience.
+
+### Structure and Organization
+1. **Centralization of Generic Functions**:
+   - Whenever possible, use generic functions to avoid code duplication.
+   - Functions such as validations and service handling should be reusable.
+
+2. **Log Messages**:
+   - All important messages must be logged using `log_message`.
+   - Use clear and standardized messages to facilitate diagnostics.
+
+3. **Pre-requisite Validation**:
+   - Before executing any Docker command or HD operation, validate the environment with dedicated functions.
+   - Use `validate_environment` to ensure the HD is mounted and Docker is available.
+
+### Coding Best Practices
+1. **Use of Local Variables**:
+   - Always declare variables as `local` within functions to avoid global conflicts.
+
+2. **Error Handling**:
+   - Always validate the return of critical commands and provide detailed error messages.
+   - Use consistent return codes: `0` for success and `1` for errors.
+
+3. **Code Readability**:
+   - Use clear comments to explain complex parts of the code.
+   - Keep the code organized and avoid overly long lines.
+
+### Docker and HD
+1. **Safe Operations**:
+   - Always stop Docker services before unmounting the HD.
+   - Use `sync` to ensure filesystem buffers are flushed before unmounting.
+
+2. **Container Maintenance**:
+   - Use commands like `clean_old_containers` to avoid the accumulation of unnecessary resources.
+   - Prefer restarting only the necessary services instead of all containers.
+
+### Logs and Diagnostics
+1. **Log Rotation**:
+   - Keep the log file to a maximum of 1000 lines, using automatic rotation.
+
+2. **Diagnostics**:
+   - Provide detailed information in the `diagnose` command to facilitate problem resolution.
+
+### Contributions
+1. **Code Standards**:
+   - Follow the guidelines above to ensure code consistency.
+   - Test all changes before submitting.
+
+2. **Documentation**:
+   - Update this file whenever new rules or guidelines are added.
+
+These rules ensure that the project remains organized, efficient, and easy to maintain.
+``````
