@@ -87,11 +87,12 @@ panel logs prowlarr -f              # View Prowlarr logs in real time
 | Command | Description |
 |---------|-------------|
 | `panel status` | Full system status |
-| `panel keepalive` | Continuous monitoring mode |
+| `panel keepalive` | Continuous monitoring mode with retry limits |
 
 ### Log Management
 | Command | Description |
 |---------|-------------|
+| `panel view-logs [n]` | View the last `n` lines of the script log file (default: 50) |
 | `panel view-logs [n]` | View the last `n` lines of the script log file (default: 50) |
 
 ### Example: View Logs
@@ -146,7 +147,7 @@ ExecStart=/usr/bin/mount UUID=your-hd-uuid /path/to/mount
 ```
 
 
-##  Keepalive Mode
+## 🕒 Keepalive Mode
 
 Keeps the HD active and monitors containers:
 
@@ -154,10 +155,27 @@ Keeps the HD active and monitors containers:
 panel keepalive
 ```
 
-- Checks HD every 30 seconds
-- Automatically remounts if disconnected
+- Checks HD every **2 minutes**
+- Automatically remounts if disconnected (up to 5 retries)
 - Restarts stopped containers
 - **Ctrl+C to stop**
+
+---
+
+## 📄 View Logs
+
+View the last `n` lines of the script log file:
+
+```bash
+panel view-logs [n]
+```
+
+- Default: Shows the last 50 lines if `n` is not specified.
+- Example:
+
+```bash
+panel view-logs 100  # View the last 100 lines of the script log file
+```
 
 
 ## 🐛 Troubleshooting

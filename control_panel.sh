@@ -1,7 +1,48 @@
 #!/bin/bash
 
 # =============================================================================
-# CONTROL PANEL - FULL VERSION WITH DOCKER AND KEEPALIVE
+# CONTROL PANEL - SCRIPT PARA GERENCIAMENTO DE HD E DOCKER
+# =============================================================================
+# Este script fornece comandos para montar/desmontar HDs externos, gerenciar
+# containers Docker e manter o HD ativo temporariamente.
+#
+# COMANDOS DISPONÍVEIS:
+#   mount       - Monta o HD externo configurado
+#   unmount     - Desmonta o HD externo de forma segura
+#   status      - Mostra o status completo do sistema (HD e Docker)
+#   keepalive   - Mantém o HD ativo e monitora containers Docker
+#   check       - Lista os pontos de montagem ativos
+#   fix         - Corrige permissões e estrutura do ponto de montagem
+#   view-logs   - Exibe os últimos registros do log do script
+#   sync        - Sincroniza arquivos e atualiza symlink global
+#
+# GERENCIAMENTO DOCKER:
+#   start       - Inicia containers (ex.: panel start [serviço] [--clean] [--no-deps])
+#   stop        - Para containers (ex.: panel stop [serviço])
+#   restart     - Reinicia containers (ex.: panel restart [serviço] [--clean])
+#   clean       - Remove containers antigos (ex.: panel clean [serviço])
+#   ps          - Lista containers em execução
+#   logs        - Exibe logs de serviços Docker (ex.: panel logs <serviço> [-f])
+#   stats       - Mostra uso de recursos (ex.: panel stats [serviço])
+#   health      - Verifica a saúde dos containers
+#
+# MANUTENÇÃO DOCKER:
+#   services    - Lista serviços disponíveis no docker-compose.yml
+#   pull        - Baixa imagens atualizadas
+#   rebuild     - Reconstrói containers (ex.: panel rebuild [serviço] [--cache])
+#   update-all  - Atualiza imagens e reinicia apenas containers atualizados
+#   networks    - Lista redes Docker
+#   volumes     - Lista volumes Docker
+#   prune       - Limpa recursos não utilizados
+#
+# UTILITÁRIOS:
+#   diagnose    - Executa diagnóstico completo do sistema
+#   force-mount - Força a remontagem do HD
+#
+# EXEMPLOS DE USO:
+#   panel mount
+#   panel start jellyfin --clean
+#   panel logs prowlarr -f
 # =============================================================================
 
 HD_MOUNT_POINT="/media/mateus/Servidor"
@@ -172,35 +213,30 @@ validate_environment() {
     return 0
 }
 
-# Função genérica para executar comandos Docker Compose com validação
-execute_docker_compose() {
+# Função genérica para executar comandos Docker Compose
+execute_docker_compose_command() {
     local command="$1"
     local service="$2"
 
     validate_environment || return 1
 
     cd "$DOCKER_COMPOSE_DIR" || {
-        echo "❌ Failed to access $DOCKER_COMPOSE_DIR"
+        log_error "Failed to access $DOCKER_COMPOSE_DIR" 1
         return 1
     }
 
-    # Split the provided command (e.g. "up -d") into args
-    IFS=' ' read -r -a CMD_ARGS <<< "$command"
-
-    # Build prefix (include --ansi never for 'docker compose' to avoid carriage-return progress)
-    local prefix=("${DOCKER_CMD_ARR[@]}")
-    if [[ "$DOCKER_COMPOSE_CMD" == "docker compose" ]]; then
-        prefix+=("--ansi" "never")
+    local args=("$command")
+    if [ -n "$service" ]; then
+        args+=("$service")
     fi
 
-    if [ -n "$service" ]; then
-        "${prefix[@]}" "${CMD_ARGS[@]}" "$service"
+    if [[ "$DOCKER_COMPOSE_CMD" == "docker compose" ]]; then
+        "${DOCKER_CMD_ARR[@]}" --ansi never "${args[@]}"
     else
-        "${prefix[@]}" "${CMD_ARGS[@]}"
+        "${DOCKER_CMD_ARR[@]}" "${args[@]}"
     fi
 
     local rc=$?
-    # Ensure final newline so subsequent echoes don't join compose output
     echo
     return $rc
 }
@@ -212,12 +248,7 @@ stop_docker_services() {
     echo "🐳 Stopping Docker services..."
     echo ""
     
-    validate_environment || return 1
-
-    execute_docker_compose "stop" "$service" || {
-        echo "❌ Failed to stop services"
-        return 1
-    }
+    execute_docker_compose_command "stop" "$service" || log_error "Failed to stop services" 1
 
     # Ensure separation from docker compose output
     echo
@@ -251,10 +282,7 @@ start_docker_services() {
         clean_old_containers "$service"
     fi
 
-    execute_docker_compose "up -d" "$service" || {
-        echo "❌ Failed to start services"
-        return 1
-    }
+    execute_docker_compose_command "up -d" "$service" || log_error "Failed to start services" 1
 
     # Ensure separation from docker compose output
     echo
@@ -285,10 +313,7 @@ restart_docker_services() {
         clean_old_containers "$service"
     fi
 
-    execute_docker_compose "restart" "$service" || {
-        echo "❌ Failed to restart services"
-        return 1
-    }
+    execute_docker_compose_command "restart" "$service" || log_error "Failed to restart services" 1
 
     # Ensure separation from docker compose output
     echo
@@ -308,45 +333,56 @@ is_hd_mounted() {
     return 1
 }
 
+# Função genérica para logar erros e retornar códigos de saída
+log_error() {
+    local message="$1"
+    local code="$2"
+    echo "❌ ERRO: $message"
+    log_message "ERROR: $message"
+    return "$code"
+}
+
+log_success() {
+    local message="$1"
+    echo "✅ SUCESSO: $message"
+    log_message "SUCCESS: $message"
+}
+
 # ✅ SIMPLIFIED FUNCTION: Mount HD
 mount_hd_simple() {
-    echo "🔍 Checking external HD..."
+    echo "🔍 Verificando HD externo..."
     echo ""
-    
-    # Automatically detect device by UUID
+
+    # Detectar dispositivo automaticamente
     local HD_DEVICE=$(get_device_by_uuid)
-    
+
     if [ -z "$HD_DEVICE" ]; then
-        echo "❌ HD not detected (UUID: $HD_UUID)"
-        echo "💡 Check if the HD is connected: lsblk"
+        log_error "HD não detectado (UUID: $HD_UUID). Verifique a conexão." 1
         return 1
     fi
-    
-    # Check if already mounted
+
     if is_hd_mounted; then
-        echo "✅ HD is already mounted at: $HD_MOUNT_POINT"
-        echo "📍 Device: $HD_DEVICE"
+        log_success "HD já está montado em $HD_MOUNT_POINT"
+        echo "📍 Dispositivo: $HD_DEVICE"
         return 0
     fi
-    
-    echo "✅ HD detected: $HD_DEVICE"
+
+    echo "✅ HD detectado: $HD_DEVICE"
     echo ""
-    
-    # Create mount point if it doesn't exist
+
     sudo mkdir -p "$HD_MOUNT_POINT"
     sudo chown mateus:mateus "$HD_MOUNT_POINT"
-    
-    echo "🔄 Mounting HD..."
+
+    echo "🔄 Montando HD..."
     echo ""
-    
-    # Try to mount by UUID (more reliable)
+
     if sudo mount UUID="$HD_UUID" "$HD_MOUNT_POINT"; then
-        echo "✅ HD successfully mounted at: $HD_MOUNT_POINT"
-        echo "📍 Device: $HD_DEVICE"
+        log_success "HD montado com sucesso em $HD_MOUNT_POINT"
+        echo "📍 Dispositivo: $HD_DEVICE"
         log_message "HD mounted: $HD_DEVICE (UUID: $HD_UUID) at $HD_MOUNT_POINT"
         return 0
     else
-        echo "❌ Error mounting HD"
+        log_error "Falha ao montar o HD" 1
         return 1
     fi
 }
@@ -396,83 +432,46 @@ unmount_hd_forced() {
 keepalive_hd_optimized() {
     # Enable trap only inside keepalive
     trap cleanup_on_exit SIGINT SIGTERM
-    
-    echo "🔋 Starting keepalive mode..."
-    echo "📝 Monitoring HD and Docker containers every 30 seconds"
-    echo "💡 Press Ctrl+C to stop"
-    echo ""
-    
-    log_message "Starting keepalive mode"
-    
-    # Load services once at the beginning
-    load_docker_services
-    
-    # Counters for optimization
+
+    echo "🔋 Iniciando modo keepalive com intervalo reduzido..."
+    echo "📝 Mantendo o HD ativo a cada 2 minutos"
+    echo "💡 Pressione Ctrl+C para parar"
+
+    log_message "Iniciando modo keepalive com intervalo reduzido"
+
     local retry_count=0
-    local max_retries=3
-    local touch_counter=0
-    
+    local max_retries=5
+
     while true; do
         if ! is_hd_mounted; then
             ((retry_count++))
-            
-            echo "$(date '+%H:%M:%S') ⚠️  HD not mounted, trying to remount... (attempt $retry_count/$max_retries)"
-            log_message "Keepalive: HD not mounted, trying to remount (attempt $retry_count)"
-            
-            # If failed too many times, pause for 5 minutes
+            echo "$(date '+%H:%M:%S') ⚠️  HD não montado, tentativa $retry_count de $max_retries..."
+            log_message "Keepalive: HD não montado, tentativa $retry_count"
+
             if [ $retry_count -ge $max_retries ]; then
-                echo "❌ ERROR: Failed after $max_retries consecutive attempts"
-                echo "⏸️  Pausing for 5 minutes before trying again..."
-                log_message "Keepalive: Multiple failures detected, pausing for 5 minutes"
+                echo "❌ Limite de tentativas atingido. Pausando por 2 minutos."
+                log_message "Keepalive: Limite de tentativas atingido. Pausando."
                 retry_count=0
-                sleep 300  # 5 minutes
+                sleep 120
                 continue
             fi
-            
-            # Try to mount
+
             if mount_hd_simple; then
-                echo "✅ Successful reconnection!"
-                log_message "Keepalive: HD successfully remounted"
-                retry_count=0  # Reset counter on success
-                
-                # Start containers after mounting HD
-                start_docker_services
+                echo "✅ HD remontado com sucesso!"
+                log_message "Keepalive: HD remontado com sucesso"
+                retry_count=0
             else
-                echo "❌ Reconnection failed, trying again in 30s..."
+                echo "❌ Falha ao remontar o HD. Tentando novamente em 2 minutos."
+                log_message "Keepalive: Falha ao remontar o HD"
             fi
         else
-            retry_count=0  # Reset counter when HD is mounted
-            
-            # Touch only every 10 minutes (20 cycles of 30s)
-            ((touch_counter++))
-            if [ $((touch_counter % 20)) -eq 0 ]; then
-                touch "$HD_MOUNT_POINT/.keepalive" 2>/dev/null
-            fi
-            
-            # Check if containers should be running but are not
-            if check_docker_environment && [ ${#DOCKER_SERVICES[@]} -gt 0 ]; then
-                local stopped_services=()
-                
-                for service in "${DOCKER_SERVICES[@]}"; do
-                    # Use grep -x for exact match (avoid false positives)
-                    if ! docker ps --format "{{.Names}}" | grep -qx "$service"; then
-                        stopped_services+=("$service")
-                    fi
-                done
-                
-                if [ ${#stopped_services[@]} -gt 0 ]; then
-                    echo "⚠️  Stopped services detected: ${stopped_services[*]}"
-                    echo "🔄 Restarting services..."
-                    for service in "${stopped_services[@]}"; do
-                        start_docker_services "$service"
-                    done
-                fi
-            fi
-            
-            echo "$(date '+%H:%M:%S') ✅ HD mounted and active"
+            retry_count=0
+            touch "$HD_MOUNT_POINT/.keepalive" 2>/dev/null
+            echo "$(date '+%H:%M:%S') ✅ HD ativo"
+            log_message "Keepalive: HD ativo"
         fi
-        
-        sleep 30
+
+        sleep 120
     done
 }
 
@@ -699,6 +698,53 @@ sync() {
 # MAIN COMMANDS - FULL VERSION
 # =============================================================================
 
+# Verificar dependências externas
+validate_dependencies() {
+    local dependencies=(blkid lsof findmnt docker)
+    local missing_dependencies=()
+
+    for dep in "${dependencies[@]}"; do
+        if ! command -v "$dep" &>/dev/null; then
+            missing_dependencies+=("$dep")
+        fi
+    done
+
+    if [ ${#missing_dependencies[@]} -gt 0 ]; then
+        echo "❌ Dependências ausentes: ${missing_dependencies[*]}"
+        echo "💡 Instale as dependências necessárias e tente novamente."
+        exit 1
+    fi
+}
+
+# Chamar validação de dependências no início do script
+validate_dependencies
+
+# Trap global para limpeza de recursos
+setup_global_trap() {
+    trap "global_cleanup" SIGINT SIGTERM
+}
+
+global_cleanup() {
+    echo "🛑 Script interrompido. Limpando recursos..."
+    log_message "Script interrupted. Cleaning up resources."
+
+    # Parar serviços Docker se necessário
+    if check_docker_environment; then
+        stop_docker_services
+    fi
+
+    # Desmontar HD se estiver montado
+    if is_hd_mounted; then
+        unmount_hd_forced
+    fi
+
+    echo "✅ Recursos limpos com sucesso."
+    exit 0
+}
+
+# Configurar o trap global no início do script
+setup_global_trap
+
 case "$1" in
     "update-all")
         echo "🔄 SMART IMAGE & CONTAINER UPDATE"
@@ -776,7 +822,7 @@ case "$1" in
     "stop")
         stop_docker_services "$2"
         ;;
-    "restart")
+    "restart"
         restart_docker_services "$2" "$3"
         ;;
     "clean")
