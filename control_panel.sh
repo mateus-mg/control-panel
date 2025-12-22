@@ -339,7 +339,7 @@ log_error() {
     local code="$2"
     echo "❌ ERRO: $message"
     log_message "ERROR: $message"
-    return "$code"
+    return $code
 }
 
 log_success() {
