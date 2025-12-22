@@ -822,7 +822,7 @@ case "$1" in
     "stop")
         stop_docker_services "$2"
         ;;
-    "restart"
+    "restart")
         restart_docker_services "$2" "$3"
         ;;
     "clean")
@@ -1025,9 +1025,7 @@ case "$1" in
         sleep 1
         mount_hd_simple
         ;;
-    "sync")
-        sync_files
-        ;;
+    # Removido: duplicidade do case 'sync' e chamada para função inexistente
     *)
         echo "🎛️  AVAILABLE COMMANDS:"
         echo ""
