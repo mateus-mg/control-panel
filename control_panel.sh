@@ -15,6 +15,20 @@ HD_UUID="35feb867-8ee2-49a9-a1a5-719a67e3975a"
 HD_LABEL="Servidor"
 HD_TYPE="ext4"
 
+# Detect the correct Docker Compose command and prepare as array
+DOCKER_COMPOSE_CMD=""
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+else
+    echo "❌ Neither 'docker compose' nor 'docker-compose' is available. Please install Docker Compose."
+    exit 1
+fi
+
+# Split command string into an array for safe invocation
+IFS=' ' read -r -a DOCKER_CMD_ARR <<< "$DOCKER_COMPOSE_CMD"
+
 # ✅ DETECT DEVICE AUTOMATICALLY BY UUID
 get_device_by_uuid() {
     # Search device by UUID (more reliable)
@@ -81,7 +95,7 @@ get_docker_services() {
     
     # Extract service names using docker compose
     if command -v docker &> /dev/null; then
-        cd "$DOCKER_COMPOSE_DIR" && docker compose config --services 2>/dev/null
+        cd "$DOCKER_COMPOSE_DIR" && "${DOCKER_CMD_ARR[@]}" config --services 2>/dev/null
         return $?
     else
         # Fallback: manually extract from YAML
@@ -133,10 +147,10 @@ clean_old_containers() {
     # If a specific service was informed
     if [ -n "$service" ]; then
         echo "🗑️  Removing old container: $service"
-        docker compose rm -f -s "$service" 2>/dev/null
+        "${DOCKER_CMD_ARR[@]}" rm -f -s "$service" 2>/dev/null
     else
         echo "🗑️  Removing all stopped containers..."
-        docker compose rm -f -s 2>/dev/null
+        "${DOCKER_CMD_ARR[@]}" rm -f -s 2>/dev/null
     fi
     
     echo "✅ Cleanup finished"
@@ -170,11 +184,25 @@ execute_docker_compose() {
         return 1
     }
 
-    if [ -n "$service" ]; then
-        docker compose "$command" "$service"
-    else
-        docker compose "$command"
+    # Split the provided command (e.g. "up -d") into args
+    IFS=' ' read -r -a CMD_ARGS <<< "$command"
+
+    # Build prefix (include --ansi never for 'docker compose' to avoid carriage-return progress)
+    local prefix=("${DOCKER_CMD_ARR[@]}")
+    if [[ "$DOCKER_COMPOSE_CMD" == "docker compose" ]]; then
+        prefix+=("--ansi" "never")
     fi
+
+    if [ -n "$service" ]; then
+        "${prefix[@]}" "${CMD_ARGS[@]}" "$service"
+    else
+        "${prefix[@]}" "${CMD_ARGS[@]}"
+    fi
+
+    local rc=$?
+    # Ensure final newline so subsequent echoes don't join compose output
+    echo
+    return $rc
 }
 
 # ✅ FUNCTION: Stop Docker containers (now accepts specific service)
@@ -191,6 +219,8 @@ stop_docker_services() {
         return 1
     }
 
+    # Ensure separation from docker compose output
+    echo
     echo "✅ Docker services stopped"
 }
 
@@ -226,6 +256,8 @@ start_docker_services() {
         return 1
     }
 
+    # Ensure separation from docker compose output
+    echo
     echo "✅ Docker services started"
 }
 
@@ -258,6 +290,8 @@ restart_docker_services() {
         return 1
     }
 
+    # Ensure separation from docker compose output
+    echo
     echo "✅ Docker services restarted"
 }
 
@@ -535,23 +569,43 @@ docker_compose_safe() {
     case "$command" in
         "up")
             if [ -n "$service" ]; then
-                docker compose up -d "$service"
+                # add --ansi never for docker compose to avoid progress control-chars
+                if [[ "$DOCKER_COMPOSE_CMD" == "docker compose" ]]; then
+                    "${DOCKER_CMD_ARR[@]}" --ansi never up -d "$service"
+                else
+                    "${DOCKER_CMD_ARR[@]}" up -d "$service"
+                fi
             else
-                docker compose up -d
+                if [[ "$DOCKER_COMPOSE_CMD" == "docker compose" ]]; then
+                    "${DOCKER_CMD_ARR[@]}" --ansi never up -d
+                else
+                    "${DOCKER_CMD_ARR[@]}" up -d
+                fi
             fi
             ;;
         "stop"|"restart"|"logs")
             if [ -n "$service" ]; then
-                docker compose "$command" "$service"
+                if [[ "$DOCKER_COMPOSE_CMD" == "docker compose" ]]; then
+                    "${DOCKER_CMD_ARR[@]}" --ansi never "$command" "$service"
+                else
+                    "${DOCKER_CMD_ARR[@]}" "$command" "$service"
+                fi
             else
                 echo "❌ Service not specified."
                 return 1
             fi
             ;;
         *)
-            docker compose "$command"
+            if [[ "$DOCKER_COMPOSE_CMD" == "docker compose" ]]; then
+                "${DOCKER_CMD_ARR[@]}" --ansi never "$command"
+            else
+                "${DOCKER_CMD_ARR[@]}" "$command"
+            fi
             ;;
     esac
+    local rc=$?
+    echo
+    return $rc
 }
 
 # ✅ FUNCTION: Sync files from HD to local home and create global symlink
@@ -670,13 +724,12 @@ case "$1" in
 
         echo "⬇️  1/3: Pulling latest images..."
 
-
         declare -A SERVICE_IMAGES
         for service in "${DOCKER_SERVICES[@]}"; do
-            SERVICE_IMAGES[$service]=$(docker compose config | awk -v svc="$service" '$1==svc":" {found=1} found && $1=="image:" {print $2; found=0}')
+            SERVICE_IMAGES[$service]=$("${DOCKER_CMD_ARR[@]}" config | awk -v svc="$service" '$1==svc":" {found=1} found && $1=="image:" {print $2; found=0}')
         done
 
-        docker compose pull
+        "${DOCKER_CMD_ARR[@]}" pull
         echo ""
 
         UPDATED_SERVICES=()
@@ -686,6 +739,7 @@ case "$1" in
             local_image_id=$(docker images --no-trunc --format '{{.ID}}' "$image_name" | head -n1)
             # Get running container image ID (if running)
             running_image_id=$(docker inspect --format '{{.Image}}' "$service" 2>/dev/null)
+
             # If not running, always update
             if [ -z "$running_image_id" ]; then
                 UPDATED_SERVICES+=("$service")
@@ -694,20 +748,9 @@ case "$1" in
             fi
         done
 
-        if [ ${#UPDATED_SERVICES[@]} -eq 0 ]; then
-            echo "✅ No image was updated. No containers will be restarted."
-            log_message "update-all: No image updated."
-        else
-            echo "🛠️  2/3: Restarting updated containers: ${UPDATED_SERVICES[*]}"
-            for service in "${UPDATED_SERVICES[@]}"; do
-                docker compose up -d "$service"
-                echo "✅ $service restarted with new image (${NEW_IMAGES[$service]})"
-                log_message "update-all: Service $service restarted with new image (${NEW_IMAGES[$service]})"
-            done
-            echo ""
-            echo "✅ Update complete! Updated services: ${UPDATED_SERVICES[*]}"
-            log_message "update-all: Updated services: ${UPDATED_SERVICES[*]}"
-        fi
+        echo ""
+        echo "✅ Update complete! Updated services: ${UPDATED_SERVICES[*]}"
+        log_message "update-all: Updated services: ${UPDATED_SERVICES[*]}"
         ;;
     "mount")
         mount_hd_simple
@@ -764,7 +807,7 @@ case "$1" in
                 echo "  - $service"
             done
         else
-            cd "$DOCKER_COMPOSE_DIR" && docker compose config --services
+            cd "$DOCKER_COMPOSE_DIR" && "${DOCKER_CMD_ARR[@]}" config --services
         fi
         echo ""
         ;;
@@ -814,7 +857,7 @@ case "$1" in
             exit 1
         fi
         cd "$DOCKER_COMPOSE_DIR" || exit 1
-        docker compose pull
+        "${DOCKER_CMD_ARR[@]}" pull
         echo ""
         echo "✅ Imagens atualizadas!"
         echo "💡 Use 'panel restart' para aplicar as atualizações"
@@ -852,12 +895,12 @@ case "$1" in
         
         if [ -n "$service" ]; then
             echo "🔨 Rebuild do serviço: $service"
-            docker compose build $no_cache "$service"
-            docker compose up -d "$service"
+            "${DOCKER_CMD_ARR[@]}" build $no_cache "$service"
+            "${DOCKER_CMD_ARR[@]}" up -d "$service"
         else
             echo "🔨 Rebuild de todos os serviços"
-            docker compose build $no_cache
-            docker compose up -d
+            "${DOCKER_CMD_ARR[@]}" build $no_cache
+            "${DOCKER_CMD_ARR[@]}" up -d
         fi
         echo ""
         echo "✅ Rebuild concluído!"
