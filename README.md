@@ -25,9 +25,9 @@ panel status
 
 ### Server Startup
 ```bash
-panel mount        # Mount external HD
+panel mount        # Mount external HD (automatic via systemd)
 panel start        # Start all containers
-panel keepalive    # Keep system active (Ctrl+C to exit)
+# Keepalive runs automatically via systemd service
 ```
 
 ### Server Shutdown
@@ -87,12 +87,11 @@ panel logs prowlarr -f              # View Prowlarr logs in real time
 | Command | Description |
 |---------|-------------|
 | `panel status` | Full system status |
-| `panel keepalive` | Continuous monitoring mode with retry limits |
+| `panel keepalive` | Manual keepalive mode (runs automatically via systemd) |
 
 ### Log Management
 | Command | Description |
 |---------|-------------|
-| `panel view-logs [n]` | View the last `n` lines of the script log file (default: 50) |
 | `panel view-logs [n]` | View the last `n` lines of the script log file (default: 50) |
 
 ### Example: View Logs
@@ -139,26 +138,31 @@ DOCKER_COMPOSE_DIR="/path/to/docker-compose"
 ### Docker Compose
 Ensure your `docker-compose.yml` file is located in the directory specified by `DOCKER_COMPOSE_DIR`.
 
-### .service File
-If using the `.service` file for automatic mounting, update the `ExecStart` line to match your HD configuration:
-
-```ini
-ExecStart=/usr/bin/mount UUID=your-hd-uuid /path/to/mount
-```
-
 
 ## 🕒 Keepalive Mode
 
-Keeps the HD active and monitors containers:
+**Keepalive runs automatically** via systemd service (`panel-keepalive.service`).
 
+### Automatic Behavior:
+- ✅ Starts automatically on boot
+- ✅ Checks the drive every **60 seconds**
+- ✅ Touch marker only every **10 minutes** to reduce wear
+- ✅ Retries remount up to **5 times**, then pauses 5 minutes before retrying
+- ✅ Restarts if fails (managed by systemd)
+- ℹ️ Does NOT restart containers (they restart themselves via Docker restart policies)
+
+### Manual Mode (optional):
 ```bash
-panel keepalive
+panel keepalive  # Run manually if needed
 ```
 
-- Checks HD every **2 minutes**
-- Automatically remounts if disconnected (up to 5 retries)
-- Restarts stopped containers
-- **Ctrl+C to stop**
+### Manage Systemd Service:
+```bash
+sudo systemctl status panel-keepalive.service   # Check status
+sudo systemctl stop panel-keepalive.service     # Stop service
+sudo systemctl start panel-keepalive.service    # Start service
+sudo journalctl -u panel-keepalive.service -f   # View logs
+```
 
 ---
 
@@ -214,43 +218,39 @@ The panel logs are stored in the file `~/.panel.log`. Each message includes a ti
 - **Specific errors**: Consult the detailed messages in the log to identify failures in Docker commands or HD mounting.
 
 
-## 🛠️ Original .service Configuration
+## 🛠️ Systemd Services
 
-The original configuration of the `hdmount.service` file is as follows:
+### Active Services:
 
-```ini
-[Unit]
-Description=Mount external HD before Docker
-DefaultDependencies=no
-After=local-fs.target
-Before=docker.service
+#### 1. `hdmount.service` - HD Auto-Mount
+Mounts the external HD automatically before Docker starts.
 
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStart=/usr/bin/mount /media/mateus/Servidor
-
-[Install]
-WantedBy=multi-user.target
+```bash
+sudo systemctl status hdmount.service
 ```
 
-### Instructions Before Moving
+#### 2. `panel-keepalive.service` - Automatic Keepalive
+Keeps the HD active and monitors it continuously.
 
-1. Ensure the `.service` file is correctly configured for your system.
-2. Move the file to the systemd directory:
-   ```bash
-   sudo mv /path/to/hdmount.service /etc/systemd/system/
-   ```
-3. Reload systemd to recognize the new service:
-   ```bash
-   sudo systemctl daemon-reload
-   ```
-4. Enable the service to start on boot:
-   ```bash
-   sudo systemctl enable hdmount.service
-   ```
-5. Start the service manually to test:
-   ```bash
-   sudo systemctl start hdmount.service
-   ```
+```bash
+sudo systemctl status panel-keepalive.service
+```
+
+### Service Files Location:
+- `/etc/systemd/system/hdmount.service`
+- `/etc/systemd/system/panel-keepalive.service`
+- Source: `/media/mateus/Servidor/scripts/control-panel/panel-keepalive.service`
+
+### Useful Commands:
+```bash
+# View keepalive logs in real-time
+sudo journalctl -u panel-keepalive.service -f
+
+# Restart services
+sudo systemctl restart hdmount.service
+sudo systemctl restart panel-keepalive.service
+
+# Disable auto-start (if needed)
+sudo systemctl disable panel-keepalive.service
+```
 

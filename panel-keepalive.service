@@ -1,0 +1,23 @@
+[Unit]
+Description=Control Panel HD Keepalive Service
+After=network.target hdmount.service
+Requires=hdmount.service
+
+[Service]
+Type=simple
+User=mateus
+Group=mateus
+WorkingDirectory=/home/mateus
+ExecStart=/usr/local/bin/panel keepalive
+Restart=always
+RestartSec=60
+StandardOutput=journal
+StandardError=journal
+TimeoutStopSec=30
+
+# Restart parameters
+StartLimitInterval=200
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target
