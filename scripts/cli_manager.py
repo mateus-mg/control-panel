@@ -1220,8 +1220,7 @@ class CLIManager:
                 subprocess.run(['chmod', '+x', str(dest_script)], check=True)
                 log_success(logger, f"Script copied to: {dest_script}")
 
-            # Create bash wrapper (uses home scripts with venv fallback)
-            # This wrapper is independent of HD - uses ~/scripts/ backup
+            # Create bash wrapper only if it doesn't exist or content changed
             dest_wrapper = Path.home() / '.local' / 'bin' / 'control-panel'
             wrapper_content = '''#!/usr/bin/env bash
 # control-panel wrapper - Uses home scripts backup (no HD dependency)
@@ -1261,11 +1260,24 @@ fi
 exec python3 "$HOME_SCRIPTS_DIR/cli_manager.py" "$@"
 '''
 
-            with open(dest_wrapper, 'w') as f:
-                f.write(wrapper_content)
-            subprocess.run(['chmod', '+x', str(dest_wrapper)], check=True)
+            # Check if wrapper needs to be created or updated
+            needs_wrapper = True
+            if dest_wrapper.exists():
+                try:
+                    existing_content = dest_wrapper.read_text()
+                    # Compare content (ignore shebang line for flexibility)
+                    if wrapper_content.strip() in existing_content or existing_content.strip() == wrapper_content.strip():
+                        needs_wrapper = False
+                        log_info(logger, "Bash wrapper unchanged, skipping creation")
+                except Exception:
+                    pass  # If can't read, recreate wrapper
 
-            log_success(logger, f"Bash wrapper created: {dest_wrapper}")
+            if needs_wrapper:
+                dest_wrapper.parent.mkdir(parents=True, exist_ok=True)
+                with open(dest_wrapper, 'w') as f:
+                    f.write(wrapper_content)
+                subprocess.run(['chmod', '+x', str(dest_wrapper)], check=True)
+                log_success(logger, "Bash wrapper created: ~/.local/bin/control-panel")
 
             # Copy docker-compose.yml from HD to home directory
             source_docker_compose = Path(
