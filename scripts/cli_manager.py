@@ -1227,7 +1227,10 @@ class CLIManager:
 # control-panel wrapper - Uses home scripts backup (no HD dependency)
 # Activates venv from project directory if available
 
-PROJECT_DIR="/media/mateus/Servidor/scripts/control-panel"
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Project directory is parent of script directory (assuming script is in ~/.local/bin)
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")/scripts/control-panel"
 HOME_SCRIPTS_DIR="$HOME/scripts"
 
 # Check if home scripts exist
@@ -1236,14 +1239,14 @@ if [ ! -f "$HOME_SCRIPTS_DIR/cli_manager.py" ]; then
     echo ""
     echo "i SOLUTIONS:"
     echo "   1. Mount the HD first:"
-    echo "      sudo mount /media/mateus/Servidor"
+    echo "      sudo mount <your-hd-mount-point>"
     echo "   2. Then run sync from the HD:"
-    echo "      cd /media/mateus/Servidor/scripts/control-panel"
+    echo "      cd <project-directory>"
     echo "      ./control-panel sync"
     echo ""
     echo "   3. Or manually copy the scripts:"
     echo "      mkdir -p ~/scripts"
-    echo "      cp /media/mateus/Servidor/scripts/control-panel/scripts/*.py ~/scripts/"
+    echo "      cp <project-directory>/scripts/*.py ~/scripts/"
     exit 1
 fi
 
