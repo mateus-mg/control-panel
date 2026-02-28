@@ -1,0 +1,40 @@
+[Unit]
+Description=Control Panel Backup Daemon
+Documentation=https://github.com/mateus/control-panel
+After=network.target local-fs.target
+
+[Service]
+Type=simple
+User=mateus
+Group=mateus
+WorkingDirectory=/home/mateus
+
+# Use wrapper script like keepalive service
+ExecStart=/home/mateus/.local/bin/control-panel backup-daemon-run
+
+# Full user environment
+Environment="PATH=/home/mateus/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="HOME=/home/mateus"
+Environment="USER=mateus"
+
+# Restart policy
+Restart=on-failure
+RestartSec=300
+
+# Logs via journal
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=control-panel-backup
+
+# Timeouts and limits
+TimeoutStopSec=30
+StartLimitInterval=200
+StartLimitBurst=3
+
+# Security (optional)
+NoNewPrivileges=false
+ProtectSystem=false
+ReadWritePaths=/home/mateus /media/mateus/Servidor
+
+[Install]
+WantedBy=multi-user.target
