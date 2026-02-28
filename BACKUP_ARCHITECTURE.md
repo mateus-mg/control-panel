@@ -28,7 +28,7 @@ The backup subsystem follows the same architecture pattern as the existing keepa
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
 │              ExecStart: control-panel backup-daemon-run      │
-│              (via /home/mateus/.local/bin/control-panel)     │
+│              (via <install-dir>/control-panel)     │
 └─────────────────────────────────────────────────────────────┘
                             │
                             ▼
@@ -57,7 +57,7 @@ The backup subsystem follows the same architecture pattern as the existing keepa
 ## Files Structure
 
 ```
-/media/mateus/Servidor/scripts/control-panel/
+<project-directory>/
 ├── scripts/
 │   ├── cli_manager.py          # Main CLI entry point
 │   ├── backup_config.py        # Configuration management
@@ -79,8 +79,8 @@ After=network.target local-fs.target
 
 [Service]
 Type=simple
-User=mateus
-ExecStart=/home/mateus/.local/bin/control-panel backup-daemon-run
+User=<your-user>
+ExecStart=<install-dir>/control-panel backup-daemon-run
 Restart=on-failure
 RestartSec=300
 
@@ -91,7 +91,7 @@ WantedBy=multi-user.target
 ### Key Points
 
 1. **No dedicated Python script for daemon** - Uses `cli_manager.py` like keepalive
-2. **Wrapper script** - `/home/mateus/.local/bin/control-panel` routes commands
+2. **Wrapper script** - `<install-dir>/control-panel` routes commands
 3. **Auto-start on boot** - `systemctl enable` creates symlink in `multi-user.target.wants`
 4. **Restart policy** - Restarts on failure after 5 minutes
 
@@ -238,7 +238,7 @@ sudo journalctl -u control-panel-backup-daemon.service -n 50
 
 # Common issues:
 # - Python import errors (check scripts are in place)
-# - Permission errors (check User=mateus)
+# - Permission errors (check User=<your-user>)
 # - Path errors (check ExecStart path)
 ```
 

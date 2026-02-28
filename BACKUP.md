@@ -16,7 +16,7 @@ Automated backup system with individual schedules and retention policies per sou
 ### 1. Install the Backup Service
 
 ```bash
-cd /media/mateus/Servidor/scripts/control-panel
+cd /path/to/control-panel
 sudo ./scripts/install-backup-service.sh
 ```
 
@@ -25,20 +25,20 @@ This installs and **enables the service to start on boot**.
 ### 2. Configure Backup Destination
 
 ```bash
-control-panel backup set-destination /media/mateus/Servidor backups
+control-panel backup set-destination /path/to/your/storage backups
 ```
 
 ### 3. Add Backup Sources
 
 ```bash
 # Docker configurations - daily backup
-control-panel backup add-source /media/mateus/Servidor/containers/config \
+control-panel backup add-source /path/to/docker/config \
   --frequency daily --time 02:00 \
   --priority high \
   --description "Docker configurations"
 
 # Scripts - weekly backup
-control-panel backup add-source /media/mateus/Servidor/scripts \
+control-panel backup add-source /path/to/scripts \
   --frequency weekly --time 03:00 --day-of-week sunday \
   --priority medium \
   --description "Custom scripts"
@@ -231,7 +231,7 @@ Each backup directory contains:
 ### Example 1: Critical Configurations (Daily)
 
 ```bash
-control-panel backup add-source /media/mateus/Servidor/containers/config \
+control-panel backup add-source /path/to/docker/config \
   --frequency daily --time 02:00 \
   --daily-retention 7 --weekly-retention 4 --monthly-retention 6 \
   --priority high \
@@ -242,7 +242,7 @@ control-panel backup add-source /media/mateus/Servidor/containers/config \
 ### Example 2: Scripts (Weekly)
 
 ```bash
-control-panel backup add-source /media/mateus/Servidor/scripts \
+control-panel backup add-source /path/to/scripts \
   --frequency weekly --time 03:00 --day-of-week sunday \
   --weekly-retention 12 --monthly-retention 6 \
   --priority medium \
@@ -253,7 +253,7 @@ control-panel backup add-source /media/mateus/Servidor/scripts \
 ### Example 3: Large Media Files (Monthly)
 
 ```bash
-control-panel backup add-source /media/mateus/Servidor/media \
+control-panel backup add-source /path/to/media/files \
   --frequency monthly --time 04:00 --day 1 \
   --monthly-retention 6 --max-age 365 \
   --priority low \

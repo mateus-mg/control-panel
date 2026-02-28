@@ -177,11 +177,11 @@ Automated backup system with individual schedules and retention policies.
 sudo ./scripts/install-backup-service.sh
 
 # Configure destination
-control-panel backup set-destination /media/mateus/Servidor backups
+control-panel backup set-destination /path/to/your/storage backups
 
 # Add sources
-control-panel backup add-source /media/mateus/Servidor/containers/config --frequency daily --time 02:00
-control-panel backup add-source /media/mateus/Servidor/scripts --frequency weekly --time 03:00
+control-panel backup add-source /path/to/important/data --frequency daily --time 02:00
+control-panel backup add-source /path/to/config/files --frequency weekly --time 03:00
 
 # Start daemon
 control-panel backup daemon-start
@@ -280,7 +280,7 @@ sudo systemctl status control-panel-keepalive.service
 ### Service Files Location:
 - `/etc/systemd/system/hdmount.service`
 - `/etc/systemd/system/control-panel-keepalive.service`
-- Source: `/media/mateus/Servidor/scripts/control-panel/panel-keepalive.service`
+- Source: `<project-directory>/panel-keepalive.service`
 
 ### Useful Commands:
 ```bash
