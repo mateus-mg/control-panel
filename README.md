@@ -174,7 +174,7 @@ Automated backup system with individual schedules and retention policies.
 
 ```bash
 # Install backup service
-sudo ./install-backup-service.sh
+sudo ./scripts/install-backup-service.sh
 
 # Configure destination
 control-panel backup set-destination /media/mateus/Servidor backups

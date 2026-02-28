@@ -8,7 +8,7 @@ if command -v control-panel &> /dev/null; then
     echo "✅ control-panel command is available"
 else
     echo "❌ control-panel command is NOT available"
-    echo "💡 Run: ./install-global.sh first"
+    echo "💡 Run: ./scripts/install-global.sh first"
 fi
 
 echo ""
@@ -29,5 +29,5 @@ echo "   control-panel fix"
 echo "   control-panel view-logs"
 echo "   control-panel diagnose"
 echo ""
-echo "💡 To install globally, run: ./install-global.sh"
+echo "💡 To install globally, run: ./scripts/install-global.sh"
 echo "💡 To synchronize files, run: control-panel sync"

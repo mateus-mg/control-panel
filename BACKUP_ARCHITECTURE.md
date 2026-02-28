@@ -63,9 +63,9 @@ The backup subsystem follows the same architecture pattern as the existing keepa
 │   ├── backup_config.py        # Configuration management
 │   ├── backup_manager.py       # Backup execution (rsync)
 │   ├── backup_daemon.py        # Daemon logic
-│   └── backup_cli.py           # CLI commands
-├── backup-daemon.service       # Systemd unit file
-└── install-backup-service.sh   # Installation script
+│   ├── backup_cli.py           # CLI commands
+│   └── install-backup-service.sh  # Installation script
+└── backup-daemon.service       # Systemd unit file
 ```
 
 ## Systemd Service
@@ -98,7 +98,7 @@ WantedBy=multi-user.target
 ## Installation
 
 ```bash
-sudo ./install-backup-service.sh
+sudo ./scripts/install-backup-service.sh
 ```
 
 This script:
@@ -166,7 +166,7 @@ systemctl show --property MainPID control-panel-backup-daemon.service
 | Command | `control-panel keepalive` | `control-panel backup-daemon-run` |
 | Entry | `cli_manager.py` | `cli_manager.py` |
 | Function | `keepalive_hd_optimized()` | `run_daemon()` |
-| Install | `install-service.sh` | `install-backup-service.sh` |
+| Install Script | `scripts/install-service.sh` | `scripts/install-backup-service.sh` |
 | Boot start | `systemctl enable` | `systemctl enable` |
 
 ## Configuration

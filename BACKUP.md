@@ -17,7 +17,7 @@ Automated backup system with individual schedules and retention policies per sou
 
 ```bash
 cd /media/mateus/Servidor/scripts/control-panel
-sudo ./install-backup-service.sh
+sudo ./scripts/install-backup-service.sh
 ```
 
 This installs and **enables the service to start on boot**.
