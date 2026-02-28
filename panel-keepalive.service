@@ -1,23 +1,44 @@
 [Unit]
 Description=Control Panel HD Keepalive Service
+Documentation=https://github.com/mateus/control-panel
 After=network.target hdmount.service
 Requires=hdmount.service
+Wants=hdmount.service
 
 [Service]
 Type=simple
 User=mateus
 Group=mateus
+
+# Wrapper usa ~/scripts/ como base, então WorkingDirectory deve ser $HOME
 WorkingDirectory=/home/mateus
-ExecStart=/usr/local/bin/panel keepalive
+
+# Usar wrapper global (Python) que executa ~/scripts/cli_manager.py
+ExecStart=/home/mateus/.local/bin/control-panel keepalive
+
+# Ambiente completo do usuário
+Environment="PATH=/home/mateus/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="HOME=/home/mateus"
+Environment="USER=mateus"
+
+# Política de reinício
 Restart=always
 RestartSec=60
+
+# Logs via journal
 StandardOutput=journal
 StandardError=journal
-TimeoutStopSec=30
+SyslogIdentifier=control-panel-keepalive
 
-# Restart parameters
+# Timeout e limites
+TimeoutStopSec=30
 StartLimitInterval=200
 StartLimitBurst=3
+
+# Segurança (opcional)
+NoNewPrivileges=false
+ProtectSystem=false
+ReadWritePaths=/home/mateus /media/mateus/Servidor
 
 [Install]
 WantedBy=multi-user.target
