@@ -59,7 +59,9 @@ class ControlPanelLogger:
             console=console,
             rich_tracebacks=True,
             tracebacks_show_locals=False,
-            markup=True
+            markup=True,
+            show_path=False,  # Don't show file path and line number
+            show_time=False   # Don't show timestamp (already in message for some logs)
         )
         console_handler.setLevel(logging.INFO)
         console_format = logging.Formatter(
