@@ -65,32 +65,25 @@ class CLIManager:
             console.print("\n[bold cyan]🎛️ Control Panel System[/bold cyan]")
             console.print("[bold]Select an operation:[/bold]\n")
 
-            # Submenus first (alphabetical order)
-            console.print("[bold]Management Submenus:[/bold]")
-            submenu_options = {
+            # Options with submenus first (alphabetical), then other options (alphabetical)
+            options = {
                 "1": "Manage backups",
                 "2": "Manage Docker containers",
                 "3": "Manage HD drives",
-                "4": "Manage systemd services"
-            }
-            for key, value in submenu_options.items():
-                console.print(f"  [bold cyan][{key}][/bold cyan]  {value}")
-
-            # Other options (alphabetical order)
-            console.print("\n[bold]Other Options:[/bold]")
-            other_options = {
+                "4": "Manage systemd services",
                 "5": "Run diagnostics",
                 "6": "Sync files",
                 "7": "View logs",
                 "8": "View system status",
                 "9": "Exit"
             }
-            for key, value in other_options.items():
+
+            for key, value in options.items():
                 console.print(f"  [bold cyan][{key}][/bold cyan]  {value}")
 
             try:
                 choice = Prompt.ask("\n[bold]Your choice[/bold]", choices=list(
-                    other_options.keys()), default="9")
+                    options.keys()), default="9")
 
                 if choice == '1':
                     self.show_backup_menu()
