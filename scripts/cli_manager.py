@@ -66,23 +66,23 @@ class CLIManager:
             console.print("[bold]Select an operation:[/bold]\n")
 
             # Submenus first (alphabetical order)
-            console.print("[bold cyan]Management Submenus:[/bold cyan]\n")
+            console.print("[bold]Management Submenus:[/bold]")
             submenu_options = {
-                "1": "📦 Manage backups",
-                "2": "🐳 Manage Docker containers",
-                "3": "💾 Manage HD drives",
-                "4": "⚙️ Manage systemd services"
+                "1": "Manage backups",
+                "2": "Manage Docker containers",
+                "3": "Manage HD drives",
+                "4": "Manage systemd services"
             }
             for key, value in submenu_options.items():
                 console.print(f"  [bold cyan][{key}][/bold cyan]  {value}")
 
             # Other options (alphabetical order)
-            console.print("\n[bold cyan]Other Options:[/bold cyan]\n")
+            console.print("\n[bold]Other Options:[/bold]")
             other_options = {
-                "5": "🔍 Run diagnostics",
-                "6": "🔄 Sync files",
-                "7": "📜 View logs",
-                "8": "📊 View system status",
+                "5": "Run diagnostics",
+                "6": "Sync files",
+                "7": "View logs",
+                "8": "View system status",
                 "9": "Exit"
             }
             for key, value in other_options.items():
