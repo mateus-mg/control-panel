@@ -62,7 +62,7 @@ class CLIManager:
         """Show interactive main menu"""
         from rich.prompt import Prompt
         while True:
-            console.print("\n[bold cyan]🎛️ Control Panel System[/bold cyan]")
+            console.print("\n[bold cyan]🎛️  Control Panel System[/bold cyan]")
             console.print("[bold]Select an operation:[/bold]\n")
 
             # Options with submenus first (alphabetical), then other options (alphabetical)
