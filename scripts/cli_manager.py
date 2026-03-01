@@ -65,43 +65,51 @@ class CLIManager:
             console.print("\n[bold cyan]🎛️ Control Panel System[/bold cyan]")
             console.print("[bold]Select an operation:[/bold]\n")
 
-            options = {
-                "1": "Manage HD drives",
-                "2": "View system status",
-                "3": "Manage Docker containers",
-                "4": "Manage systemd services",
-                "5": "Sync files",
-                "6": "View logs",
-                "7": "Run diagnostics",
-                "8": "Manage backups",
+            # Submenus first (alphabetical order)
+            console.print("[bold cyan]Management Submenus:[/bold cyan]\n")
+            submenu_options = {
+                "1": "📦 Manage backups",
+                "2": "🐳 Manage Docker containers",
+                "3": "💾 Manage HD drives",
+                "4": "⚙️ Manage systemd services"
+            }
+            for key, value in submenu_options.items():
+                console.print(f"  [bold cyan][{key}][/bold cyan]  {value}")
+
+            # Other options (alphabetical order)
+            console.print("\n[bold cyan]Other Options:[/bold cyan]\n")
+            other_options = {
+                "5": "🔍 Run diagnostics",
+                "6": "🔄 Sync files",
+                "7": "📜 View logs",
+                "8": "📊 View system status",
                 "9": "Exit"
             }
-
-            for key, value in options.items():
+            for key, value in other_options.items():
                 console.print(f"  [bold cyan][{key}][/bold cyan]  {value}")
 
             try:
                 choice = Prompt.ask("\n[bold]Your choice[/bold]", choices=list(
-                    options.keys()), default="9")
+                    other_options.keys()), default="9")
 
                 if choice == '1':
-                    self.show_hd_menu()
+                    self.show_backup_menu()
                 elif choice == '2':
-                    self.show_status_interactive()
-                elif choice == '3':
                     self.show_docker_menu()
+                elif choice == '3':
+                    self.show_hd_menu()
                 elif choice == '4':
                     self.show_systemd_menu()
                 elif choice == '5':
-                    self.sync_interactive()
+                    self.diagnostics_interactive()
                 elif choice == '6':
+                    self.sync_interactive()
+                elif choice == '7':
                     lines = Prompt.ask(
                         "How many log lines do you want to see?", default="50", show_default=True)
                     self.view_logs_interactive(int(lines))
-                elif choice == '7':
-                    self.diagnostics_interactive()
                 elif choice == '8':
-                    self.show_backup_menu()
+                    self.show_status_interactive()
                 elif choice == '9':
                     console.print("[green]Exiting... Goodbye![/green]")
                     break
