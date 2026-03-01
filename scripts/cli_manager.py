@@ -775,7 +775,7 @@ class CLIManager:
                     logger, f"HD not detected (UUID: {self.hd_uuid}). Check the connection.")
                 return
 
-            console.print(f"[green]✓ HD device detected: {hd_device}[/green]")
+            console.print("[green]HD device detected: " + hd_device + "[/green]")
 
             # Create mount point if needed
             subprocess.run(
@@ -919,7 +919,7 @@ class CLIManager:
                 else:
                     console.print("   No running containers")
             else:
-                console.print("[red]✗ Docker not available[/red]")
+                console.print("[red]Docker not available[/red]")
         except Exception as e:
             console.print(f"[red]Error checking Docker: {e}[/red]")
 
@@ -1358,38 +1358,38 @@ exec python3 "$HOME_SCRIPTS_DIR/cli_manager.py" "$@"
             except Exception as e:
                 console.print(f"[red]Error reading logs: {e}[/red]")
         else:
-            console.print(f"[red]✗ Log file not found: {log_file}[/red]")
+            console.print(f"[red]Log file not found: {log_file}[/red]")
 
     def diagnostics_interactive(self):
         """Run diagnostics"""
-        console.print("\n[bold cyan]🔍 Running Diagnostics[/bold cyan]")
+        console.print("\n[bold cyan]Running Diagnostics[/bold cyan]")
 
         try:
             # Check HD
-            console.print("\n[bold]📀 HD Check:[/bold]")
+            console.print("\n[bold]HD Check:[/bold]")
             if self.is_hd_mounted():
-                console.print("[green]✓ HD is mounted[/green]")
+                console.print("[green]HD is mounted[/green]")
                 result = subprocess.run(['df', '-h', self.hd_mount_point],
                                         capture_output=True, text=True)
                 console.print(result.stdout)
             else:
-                console.print("[red]✗ HD is not mounted[/red]")
+                console.print("[red]HD is not mounted[/red]")
 
             # Check Docker
-            console.print("\n[bold]🐳 Docker Check:[/bold]")
+            console.print("\n[bold]Docker Check:[/bold]")
             try:
                 result = subprocess.run(['docker', '--version'],
                                         capture_output=True, text=True)
                 if result.returncode == 0:
                     console.print(
-                        f"[green]✓ Docker: {result.stdout.strip()}[/green]")
+                        f"[green]Docker: {result.stdout.strip()}[/green]")
                 else:
-                    console.print("[red]✗ Docker: Not available[/red]")
+                    console.print("[red]Docker: Not available[/red]")
             except Exception:
-                console.print("[red]✗ Docker: Not available[/red]")
+                console.print("[red]Docker: Not available[/red]")
 
             # Check disk space
-            console.print("\n[bold]💾 Disk Space:[/bold]")
+            console.print("\n[bold]Disk Space:[/bold]")
             try:
                 result = subprocess.run(['df', '-h'],
                                         capture_output=True, text=True)
@@ -1402,7 +1402,7 @@ exec python3 "$HOME_SCRIPTS_DIR/cli_manager.py" "$@"
 
     def systemd_keepalive_status(self):
         """Check keepalive service status"""
-        console.print("\n[bold cyan]⚙️ Keepalive Service Status[/bold cyan]")
+        console.print("\n[bold cyan]Keepalive Service Status[/bold cyan]")
 
         try:
             result = subprocess.run(['systemctl', 'status', 'control-panel-keepalive.service'],
