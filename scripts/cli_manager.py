@@ -66,18 +66,15 @@ class CLIManager:
             console.print("[bold]Select an operation:[/bold]\n")
 
             options = {
-                "1": "Mount HD drive",
-                "2": "Unmount HD drive",
-                "3": "View system status",
-                "4": "Manage Docker containers",
-                "5": "Manage systemd services",
-                "6": "Keep HD alive (monitor mode)",
-                "7": "Fix mount point",
-                "8": "Sync files",
-                "9": "View logs",
-                "10": "Run diagnostics",
-                "11": "Manage backups",
-                "12": "Exit"
+                "1": "Manage HD drives",
+                "2": "View system status",
+                "3": "Manage Docker containers",
+                "4": "Manage systemd services",
+                "5": "Sync files",
+                "6": "View logs",
+                "7": "Run diagnostics",
+                "8": "Manage backups",
+                "9": "Exit"
             }
 
             for key, value in options.items():
@@ -85,33 +82,27 @@ class CLIManager:
 
             try:
                 choice = Prompt.ask("\n[bold]Your choice[/bold]", choices=list(
-                    options.keys()), default="12")
+                    options.keys()), default="9")
 
                 if choice == '1':
-                    self.mount_hd_interactive()
+                    self.show_hd_menu()
                 elif choice == '2':
-                    self.unmount_hd_interactive()
-                elif choice == '3':
                     self.show_status_interactive()
-                elif choice == '4':
+                elif choice == '3':
                     self.show_docker_menu()
-                elif choice == '5':
+                elif choice == '4':
                     self.show_systemd_menu()
-                elif choice == '6':
-                    self.keepalive_hd_interactive()
-                elif choice == '7':
-                    self.fix_mount_point_interactive()
-                elif choice == '8':
+                elif choice == '5':
                     self.sync_interactive()
-                elif choice == '9':
+                elif choice == '6':
                     lines = Prompt.ask(
                         "How many log lines do you want to see?", default="50", show_default=True)
                     self.view_logs_interactive(int(lines))
-                elif choice == '10':
+                elif choice == '7':
                     self.diagnostics_interactive()
-                elif choice == '11':
+                elif choice == '8':
                     self.show_backup_menu()
-                elif choice == '12':
+                elif choice == '9':
                     console.print("[green]Exiting... Goodbye![/green]")
                     break
 
@@ -305,6 +296,53 @@ class CLIManager:
 
                 # Pause before showing the menu again
                 input("\nPress Enter to continue...")
+
+            except KeyboardInterrupt:
+                console.print("\n[red]Operation cancelled by user.[/red]")
+                break
+            except Exception as e:
+                console.print(f"[red]Error: {e}[/red]")
+
+    def show_hd_menu(self):
+        """Show interactive HD drives management menu"""
+        from rich.prompt import Prompt
+        while True:
+            console.print(
+                "\n[bold cyan]💾 HD Drives Management[/bold cyan]")
+            console.print("[bold]Select an operation:[/bold]\n")
+
+            options = {
+                "1": "Mount HD drive",
+                "2": "Unmount HD drive",
+                "3": "Fix mount point",
+                "4": "Keep HD alive (monitor mode)",
+                "5": "Check active mounts",
+                "6": "Return to main menu"
+            }
+
+            for key, value in options.items():
+                console.print(f"  [bold cyan][{key}][/bold cyan]  {value}")
+
+            try:
+                choice = Prompt.ask("\n[bold]Your choice[/bold]", choices=list(
+                    options.keys()), default="6")
+
+                if choice == '1':
+                    self.mount_hd_interactive()
+                elif choice == '2':
+                    self.unmount_hd_interactive()
+                elif choice == '3':
+                    self.fix_mount_point_interactive()
+                elif choice == '4':
+                    self.keepalive_hd_interactive()
+                elif choice == '5':
+                    self.check_mounts()
+                elif choice == '6':
+                    break
+
+                # Pause before showing the menu again
+                if choice != '6':
+                    input("\nPress Enter to continue...")
 
             except KeyboardInterrupt:
                 console.print("\n[red]Operation cancelled by user.[/red]")
