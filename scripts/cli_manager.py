@@ -143,7 +143,7 @@ class CLIManager:
             console.print("[red]No services found in docker-compose.yml[/red]")
             return False
 
-        console.print("\n[bold cyan]🐳 Select a service:[/bold cyan]\n")
+        console.print("\n[bold cyan]🐳  Select a service:[/bold cyan]\n")
 
         # Build options dict - services numbered 1-N
         options = {}
@@ -178,7 +178,7 @@ class CLIManager:
         """Show interactive Docker management menu"""
         from rich.prompt import Prompt
         while True:
-            console.print("\n[bold cyan]🐳 Docker Management[/bold cyan]")
+            console.print("\n[bold cyan]🐳  Docker Management[/bold cyan]")
             console.print("[bold]Select an operation:[/bold]\n")
 
             options = {
@@ -758,7 +758,7 @@ class CLIManager:
 
     def mount_hd_interactive(self):
         """Interactive HD mounting"""
-        console.print("\n[bold cyan]📀 Mounting HD Drive[/bold cyan]")
+        console.print("\n[bold cyan]📀  Mounting HD Drive[/bold cyan]")
 
         try:
             # Check if already mounted
@@ -798,7 +798,7 @@ class CLIManager:
 
     def unmount_hd_interactive(self):
         """Interactive HD unmounting"""
-        console.print("\n[bold cyan]📤 Unmounting HD Drive[/bold cyan]")
+        console.print("\n[bold cyan]📤  Unmounting HD Drive[/bold cyan]")
 
         try:
             if not self.is_hd_mounted():
@@ -852,10 +852,10 @@ class CLIManager:
 
     def show_status_interactive(self):
         """Show system status"""
-        console.print("\n[bold cyan]📊 System Status[/bold cyan]")
+        console.print("\n[bold cyan]📊  System Status[/bold cyan]")
 
         # HD status
-        console.print("\n[bold]📀 HD Status:[/bold]")
+        console.print("\n[bold]📀  HD Status:[/bold]")
         if self.is_hd_mounted():
             log_success(logger, f"MOUNTED at {self.hd_mount_point}")
             try:
@@ -876,7 +876,7 @@ class CLIManager:
                 console.print("[yellow]i Device: NOT DETECTED[/yellow]")
 
         # Docker status
-        console.print("\n[bold]🐳 Docker Status:[/bold]")
+        console.print("\n[bold]🐳  Docker Status:[/bold]")
         try:
             if subprocess.run(['docker', 'ps'],
                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
