@@ -1255,34 +1255,32 @@ class CLIManager:
                     if dest_file.exists():
                         if filecmp.cmp(str(source_file), str(dest_file), shallow=False):
                             needs_copy = False
-                            log_info(
-                                logger, f"Python script unchanged: {py_file}")
+                            console.print(f"[dim]Python script unchanged: {py_file}[/dim]")
 
                     if needs_copy:
                         subprocess.run(
                             ['cp', '-p', str(source_file), str(dest_file)], check=True)
-                        log_success(logger, f"Python script copied: {py_file}")
+                        console.print(f"[green]Python script copied: {py_file}[/green]")
 
             # Copy control_panel.sh to ~/scripts/ (backup bash wrapper)
             source_script = project_root / 'control_panel.sh'
             dest_script = Path.home() / 'scripts' / 'control_panel.sh'
 
             if not source_script.exists():
-                log_error(logger, f"Source script not found: {source_script}")
+                console.print(f"[red]Source script not found: {source_script}[/red]")
                 return
 
             needs_copy = True
             if dest_script.exists():
                 if filecmp.cmp(str(source_script), str(dest_script), shallow=False):
                     needs_copy = False
-                    log_info(
-                        logger, f"Script unchanged, skipping copy: {dest_script}")
+                    console.print("[dim]Script unchanged, skipping copy[/dim]")
 
             if needs_copy:
                 subprocess.run(['cp', '-p', str(source_script),
                                str(dest_script)], check=True)
                 subprocess.run(['chmod', '+x', str(dest_script)], check=True)
-                log_success(logger, f"Script copied to: {dest_script}")
+                console.print("[green]Script copied to: ~/scripts/control_panel.sh[/green]")
 
             # Create bash wrapper only if it doesn't exist or content changed
             dest_wrapper = Path.home() / '.local' / 'bin' / 'control-panel'
@@ -1332,7 +1330,7 @@ exec python3 "$HOME_SCRIPTS_DIR/cli_manager.py" "$@"
                     # Compare content (ignore shebang line for flexibility)
                     if wrapper_content.strip() in existing_content or existing_content.strip() == wrapper_content.strip():
                         needs_wrapper = False
-                        log_info(logger, "Bash wrapper unchanged, skipping creation")
+                        console.print("[dim]Bash wrapper unchanged, skipping creation[/dim]")
                 except Exception:
                     pass  # If can't read, recreate wrapper
 
@@ -1341,7 +1339,7 @@ exec python3 "$HOME_SCRIPTS_DIR/cli_manager.py" "$@"
                 with open(dest_wrapper, 'w') as f:
                     f.write(wrapper_content)
                 subprocess.run(['chmod', '+x', str(dest_wrapper)], check=True)
-                log_success(logger, "Bash wrapper created: ~/.local/bin/control-panel")
+                console.print("[green]Bash wrapper created: ~/.local/bin/control-panel[/green]")
 
             # Copy docker-compose.yml from HD to home directory
             source_docker_compose = Path(
@@ -1354,17 +1352,14 @@ exec python3 "$HOME_SCRIPTS_DIR/cli_manager.py" "$@"
                 if os.path.exists(dest_docker_compose):
                     if filecmp.cmp(str(source_docker_compose), dest_docker_compose, shallow=False):
                         needs_copy = False
-                        log_info(
-                            logger, f"Docker Compose unchanged, skipping copy: {dest_docker_compose}")
+                        console.print("[dim]Docker Compose unchanged, skipping copy[/dim]")
 
                 if needs_copy:
                     subprocess.run(
                         ['cp', '-p', str(source_docker_compose), dest_docker_compose], check=True)
-                    log_success(
-                        logger, f"Docker Compose file copied to: {dest_docker_compose}")
+                    console.print("[green]Docker Compose copied to: ~/docker-compose.yml[/green]")
             else:
-                log_warning(
-                    logger, f"Docker Compose file not found: {source_docker_compose}")
+                console.print("[yellow]Docker Compose file not found[/yellow]")
 
         except Exception as e:
             log_error(logger, f"Error syncing files: {str(e)}")
