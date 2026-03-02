@@ -1213,8 +1213,8 @@ class CLIManager:
             os.makedirs(os.path.expanduser("~/.local/bin"), exist_ok=True)
             os.makedirs(os.path.expanduser("~/scripts"), exist_ok=True)
 
-            # Get project root directory (parent of scripts directory)
-            project_root = Path(__file__).resolve().parent.parent
+            # Use absolute path for project root (where control_panel.sh lives)
+            project_root = Path("/media/mateus/Servidor/scripts/control-panel")
 
             # Copy Python scripts to ~/scripts/
             source_scripts_dir = project_root / 'scripts'
