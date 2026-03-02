@@ -58,6 +58,30 @@ class CLIManager:
         self.docker_compose_dir = Path("/home/mateus")
         self.docker_compose_file = self.docker_compose_dir / "docker-compose.yml"
 
+    def _find_project_root(self) -> Path:
+        """Find project root by searching for control_panel.sh
+        
+        Searches up the directory tree from the current file location.
+        Falls back to default path if not found.
+        
+        Returns:
+            Path to project root directory
+        """
+        # Default fallback path
+        default_path = Path("/media/mateus/Servidor/scripts/control-panel")
+        
+        # Start from current file and search up
+        current = Path(__file__).resolve()
+        for parent in current.parents:
+            if (parent / 'control_panel.sh').exists():
+                return parent
+            # Stop searching at common root directories
+            if parent == parent.parent or str(parent) in ['/home', '/media', '/']:
+                break
+        
+        # Return default if not found
+        return default_path
+
     def show_interactive_menu(self):
         """Show interactive main menu"""
         from rich.prompt import Prompt
@@ -1213,8 +1237,8 @@ class CLIManager:
             os.makedirs(os.path.expanduser("~/.local/bin"), exist_ok=True)
             os.makedirs(os.path.expanduser("~/scripts"), exist_ok=True)
 
-            # Use absolute path for project root (where control_panel.sh lives)
-            project_root = Path("/media/mateus/Servidor/scripts/control-panel")
+            # Find project root by searching for control_panel.sh
+            project_root = self._find_project_root()
 
             # Copy Python scripts to ~/scripts/
             source_scripts_dir = project_root / 'scripts'
