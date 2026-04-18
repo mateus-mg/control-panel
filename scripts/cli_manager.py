@@ -99,7 +99,8 @@ class CLIManager:
                 "6": "Sync files",
                 "7": "View logs",
                 "8": "View system status",
-                "9": "Exit"
+                "9": "Clean SWAP",
+                "10": "Exit"
             }
 
             for key, value in options.items():
@@ -128,6 +129,8 @@ class CLIManager:
                 elif choice == '8':
                     self.show_status_interactive()
                 elif choice == '9':
+                    self.clean_swap_interactive()
+                elif choice == '10':
                     console.print("[green]Exiting... Goodbye![/green]")
                     break
 
