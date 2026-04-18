@@ -797,15 +797,21 @@ class CLIManager:
             if not hd_device:
                 log_error(
                     logger, f"HD not detected (UUID: {self.hd_uuid}). Check the connection.")
-                return
+                return False
 
             console.print("[green]HD device detected: " + hd_device + "[/green]")
 
             # Create mount point if needed
-            subprocess.run(
-                ['sudo', 'mkdir', '-p', self.hd_mount_point], check=False)
-            subprocess.run(['sudo', 'chown', 'mateus:mateus',
-                           self.hd_mount_point], check=False)
+            result = subprocess.run(
+                ['sudo', 'mkdir', '-p', self.hd_mount_point], capture_output=True, text=True)
+            if result.returncode != 0:
+                log_error(logger, f"Failed to create mount point: {result.stderr}")
+                return False
+            result = subprocess.run(['sudo', 'chown', 'mateus:mateus',
+                           self.hd_mount_point], capture_output=True, text=True)
+            if result.returncode != 0:
+                log_error(logger, f"Failed to set ownership: {result.stderr}")
+                return False
 
             # Mount the drive
             result = subprocess.run(['sudo', 'mount', f'UUID={self.hd_uuid}', self.hd_mount_point],
@@ -814,11 +820,14 @@ class CLIManager:
             if result.returncode == 0:
                 log_success(
                     logger, f"HD mounted successfully at {self.hd_mount_point}")
+                return True
             else:
                 log_error(logger, f"Failed to mount HD: {result.stderr}")
+                return False
 
         except Exception as e:
             log_error(logger, f"Error mounting HD: {str(e)}")
+            return False
 
     def unmount_hd_interactive(self):
         """Interactive HD unmounting"""
@@ -1187,7 +1196,7 @@ class CLIManager:
                         retry_count = 0
                     else:
                         console.print(
-                            "[red]✗ Failed to remount HD. Retrying in {loop_seconds} seconds.[/red]")
+                            f"[red]✗ Failed to remount HD. Retrying in {loop_seconds} seconds.[/red]")
                         time.sleep(loop_seconds)
                 else:
                     retry_count = 0
@@ -1199,8 +1208,8 @@ class CLIManager:
                     try:
                         with open(marker_file, 'a'):
                             os.utime(marker_file, None)
-                    except:
-                        pass  # Ignore errors touching marker file
+                    except Exception as e:
+                        log_warning(logger, f"Keepalive operation failed: {e}")
 
                 time.sleep(loop_seconds)
 
