@@ -1701,6 +1701,8 @@ def main():
             cli_manager.keepalive_hd_interactive()
         elif command == "status":
             cli_manager.show_status_interactive()
+        elif command == "swap-clean":
+            cli_manager.clean_swap_interactive()
         elif command == "mount":
             cli_manager.mount_hd_interactive()
         elif command == "unmount":
