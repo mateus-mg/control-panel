@@ -6,7 +6,7 @@ Command-line interface for managing HD drives, Docker containers, and system ser
 
 # Flexible import to handle direct execution and importing
 try:
-    from .log_config import get_logger, log_success, log_error, log_warning, log_info, log_mount, log_docker, log_systemd
+    from .log_config import get_logger, log_success, log_error, log_warning, log_info, log_mount, log_docker, log_systemd, log_swap
 except ImportError:
     # When executed directly, use absolute imports
     import sys
@@ -15,7 +15,7 @@ except ImportError:
     script_dir = Path(__file__).parent
     sys.path.insert(0, str(script_dir))
 
-    from log_config import get_logger, log_success, log_error, log_warning, log_info, log_mount, log_docker, log_systemd
+    from log_config import get_logger, log_success, log_error, log_warning, log_info, log_mount, log_docker, log_systemd, log_swap
 
 import sys
 import os
@@ -99,7 +99,8 @@ class CLIManager:
                 "6": "Sync files",
                 "7": "View logs",
                 "8": "View system status",
-                "9": "Exit"
+                "9": "Clean SWAP",
+                "10": "Exit"
             }
 
             for key, value in options.items():
@@ -128,6 +129,8 @@ class CLIManager:
                 elif choice == '8':
                     self.show_status_interactive()
                 elif choice == '9':
+                    self.clean_swap_interactive()
+                elif choice == '10':
                     console.print("[green]Exiting... Goodbye![/green]")
                     break
 
@@ -797,15 +800,21 @@ class CLIManager:
             if not hd_device:
                 log_error(
                     logger, f"HD not detected (UUID: {self.hd_uuid}). Check the connection.")
-                return
+                return False
 
             console.print("[green]HD device detected: " + hd_device + "[/green]")
 
             # Create mount point if needed
-            subprocess.run(
-                ['sudo', 'mkdir', '-p', self.hd_mount_point], check=False)
-            subprocess.run(['sudo', 'chown', 'mateus:mateus',
-                           self.hd_mount_point], check=False)
+            result = subprocess.run(
+                ['sudo', 'mkdir', '-p', self.hd_mount_point], capture_output=True, text=True)
+            if result.returncode != 0:
+                log_error(logger, f"Failed to create mount point: {result.stderr}")
+                return False
+            result = subprocess.run(['sudo', 'chown', 'mateus:mateus',
+                           self.hd_mount_point], capture_output=True, text=True)
+            if result.returncode != 0:
+                log_error(logger, f"Failed to set ownership: {result.stderr}")
+                return False
 
             # Mount the drive
             result = subprocess.run(['sudo', 'mount', f'UUID={self.hd_uuid}', self.hd_mount_point],
@@ -814,11 +823,14 @@ class CLIManager:
             if result.returncode == 0:
                 log_success(
                     logger, f"HD mounted successfully at {self.hd_mount_point}")
+                return True
             else:
                 log_error(logger, f"Failed to mount HD: {result.stderr}")
+                return False
 
         except Exception as e:
             log_error(logger, f"Error mounting HD: {str(e)}")
+            return False
 
     def unmount_hd_interactive(self):
         """Interactive HD unmounting"""
@@ -1187,7 +1199,7 @@ class CLIManager:
                         retry_count = 0
                     else:
                         console.print(
-                            "[red]✗ Failed to remount HD. Retrying in {loop_seconds} seconds.[/red]")
+                            f"[red]✗ Failed to remount HD. Retrying in {loop_seconds} seconds.[/red]")
                         time.sleep(loop_seconds)
                 else:
                     retry_count = 0
@@ -1199,8 +1211,8 @@ class CLIManager:
                     try:
                         with open(marker_file, 'a'):
                             os.utime(marker_file, None)
-                    except:
-                        pass  # Ignore errors touching marker file
+                    except Exception as e:
+                        log_warning(logger, f"Keepalive operation failed: {e}")
 
                 time.sleep(loop_seconds)
 
@@ -1419,6 +1431,84 @@ exec python3 "$HOME_SCRIPTS_DIR/cli_manager.py" "$@"
         except Exception as e:
             log_error(logger, f"Error running diagnostics: {str(e)}")
 
+# Configurable wait time (can be overridden via environment variable)
+SWAP_CLEANUP_WAIT_SECONDS = 5  # seconds to wait between swapoff and swapon
+
+def clean_swap_interactive(self):
+    """Clean SWAP by disabling, waiting, and re-enabling"""
+    console.print("\n[bold cyan]🔄 SWAP Cleanup[/bold cyan]")
+    
+    wait_time = int(os.getenv('SWAP_CLEANUP_WAIT_SECONDS', SWAP_CLEANUP_WAIT_SECONDS))
+    
+    try:
+        # Check current swap status
+        result = subprocess.run(['free', '-h'], capture_output=True, text=True)
+        if 'Swap' not in result.stdout:
+            log_warning(logger, "No swap configured on system")
+            return
+            
+        console.print("\n[bold]Current SWAP status:[/bold]")
+        subprocess.run(['free', '-h'], shell=False)
+        
+        # Confirmation prompt
+        from rich.prompt import Confirm
+        if not Confirm.ask("[bold yellow]This will temporarily disable SWAP. Continue?[/bold yellow]", default=False):
+            console.print("[yellow]Operation cancelled[/yellow]")
+            return
+            
+        console.print("\n[cyan]Disabling SWAP...[/cyan]")
+        
+        # Disable all swap
+        result = subprocess.run(['sudo', 'swapoff', '-a'], capture_output=True, text=True)
+        if result.returncode != 0:
+            log_error(logger, f"Failed to disable swap: {result.stderr}")
+            return
+            
+        # Monitor swap deactivation
+        console.print("[cyan]Waiting for SWAP to be fully disabled...[/cyan]")
+        max_wait = 30
+        waited = 0
+        while waited < max_wait:
+            time.sleep(1)
+            with open('/proc/swaps', 'r') as f:
+                lines = f.readlines()
+                if len(lines) <= 1:
+                    break
+            waited += 1
+            
+        if waited >= max_wait:
+            log_error(logger, "Timeout waiting for swap to disable")
+            subprocess.run(['sudo', 'swapon', '-a'], capture_output=True)
+            return
+            
+        console.print(f"[green]✓ SWAP disabled after {waited} seconds[/green]")
+        log_swap(logger, f"SWAP disabled after {waited} seconds")
+        
+        # Wait before re-enabling (configurable)
+        console.print(f"[cyan]Waiting {wait_time} seconds before re-enabling...[/cyan]")
+        time.sleep(wait_time)
+        
+        # Re-enable swap
+        console.print("[cyan]Re-enabling SWAP...[/cyan]")
+        result = subprocess.run(['sudo', 'swapon', '-a'], capture_output=True, text=True)
+        if result.returncode != 0:
+            log_error(logger, f"Failed to re-enable swap: {result.stderr}")
+            return
+            
+        console.print("[green]✓ SWAP re-enabled successfully[/green]")
+        log_swap(logger, f"SWAP cleanup completed (waited {wait_time}s between operations)")
+        
+        # Show final status
+        console.print("\n[bold]Final SWAP status:[/bold]")
+        subprocess.run(['free', '-h'], shell=False)
+        
+    except Exception as e:
+        log_error(logger, f"Error during SWAP cleanup: {str(e)}")
+        try:
+            subprocess.run(['sudo', 'swapon', '-a'], capture_output=True)
+        except:
+            pass
+
     def systemd_keepalive_status(self):
         """Check keepalive service status"""
         console.print("\n[bold cyan]Keepalive Service Status[/bold cyan]")
@@ -1611,6 +1701,8 @@ def main():
             cli_manager.keepalive_hd_interactive()
         elif command == "status":
             cli_manager.show_status_interactive()
+        elif command == "swap-clean":
+            cli_manager.clean_swap_interactive()
         elif command == "mount":
             cli_manager.mount_hd_interactive()
         elif command == "unmount":

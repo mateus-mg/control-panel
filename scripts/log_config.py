@@ -34,6 +34,7 @@ SYMBOLS = {
     'storage': '[STORAGE]',
     'system': '[SYSTEM]',
     'power': '[POWER]',
+    'swap': '[SWAP]',
     'sync': '[SYNC]',
     'time': '[TIME]'
 }
@@ -257,6 +258,12 @@ def log_power(logger: logging.Logger, message: str, include_request_id: bool = T
     formatted_message = format_log_message(message, include_request_id)
     logger.info(ControlPanelLogger.format_message(
         'power', formatted_message))
+
+
+def log_swap(logger: logging.Logger, message: str, include_request_id: bool = True):
+    """Log SWAP operation message"""
+    formatted_message = format_log_message(message, include_request_id)
+    logger.info(ControlPanelLogger.format_message('swap', formatted_message))
 
 
 def log_sync(logger: logging.Logger, message: str, include_request_id: bool = True):
