@@ -108,7 +108,7 @@ class CLIManager:
 
             try:
                 choice = Prompt.ask("\n[bold]Your choice[/bold]", choices=list(
-                    options.keys()), default="9")
+                    options.keys()), default="10")
 
                 if choice == '1':
                     self.show_backup_menu()
