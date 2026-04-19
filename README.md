@@ -1,5 +1,14 @@
 # 🎛️ Control Panel - Server Manager
 
+[![Documentation](https://img.shields.io/badge/docs-live-blue.svg)](https://mateus.github.io/control-panel)
+[![GitHub Pages](https://img.shields.io/badge/GitHub-Pages-deployable-green.svg)](https://mateus.github.io/control-panel)
+
+Bash and Python system for managing external HD drives and Docker containers on a home server.
+
+> **Documentation:** Full documentation is now available at [https://mateus.github.io/control-panel](https://mateus.github.io/control-panel)
+
+---
+
 Bash script to manage external HD and Docker containers on a home server.
 
 
