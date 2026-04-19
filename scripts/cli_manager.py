@@ -1431,83 +1431,72 @@ exec python3 "$HOME_SCRIPTS_DIR/cli_manager.py" "$@"
         except Exception as e:
             log_error(logger, f"Error running diagnostics: {str(e)}")
 
-# Configurable wait time (can be overridden via environment variable)
-SWAP_CLEANUP_WAIT_SECONDS = 5  # seconds to wait between swapoff and swapon
-
-def clean_swap_interactive(self):
-    """Clean SWAP by disabling, waiting, and re-enabling"""
-    console.print("\n[bold cyan]🔄 SWAP Cleanup[/bold cyan]")
-    
-    wait_time = int(os.getenv('SWAP_CLEANUP_WAIT_SECONDS', SWAP_CLEANUP_WAIT_SECONDS))
-    
-    try:
-        # Check current swap status
-        result = subprocess.run(['free', '-h'], capture_output=True, text=True)
-        if 'Swap' not in result.stdout:
-            log_warning(logger, "No swap configured on system")
-            return
-            
-        console.print("\n[bold]Current SWAP status:[/bold]")
-        subprocess.run(['free', '-h'], shell=False)
+    def clean_swap_interactive(self):
+        """Clean SWAP by disabling, waiting, and re-enabling"""
+        swap_wait_seconds = int(os.getenv('SWAP_CLEANUP_WAIT_SECONDS', 5))
         
-        # Confirmation prompt
-        from rich.prompt import Confirm
-        if not Confirm.ask("[bold yellow]This will temporarily disable SWAP. Continue?[/bold yellow]", default=False):
-            console.print("[yellow]Operation cancelled[/yellow]")
-            return
-            
-        console.print("\n[cyan]Disabling SWAP...[/cyan]")
+        console.print("\n[bold cyan]🔄 SWAP Cleanup[/bold cyan]")
         
-        # Disable all swap
-        result = subprocess.run(['sudo', 'swapoff', '-a'], capture_output=True, text=True)
-        if result.returncode != 0:
-            log_error(logger, f"Failed to disable swap: {result.stderr}")
-            return
-            
-        # Monitor swap deactivation
-        console.print("[cyan]Waiting for SWAP to be fully disabled...[/cyan]")
-        max_wait = 30
-        waited = 0
-        while waited < max_wait:
-            time.sleep(1)
-            with open('/proc/swaps', 'r') as f:
-                lines = f.readlines()
-                if len(lines) <= 1:
-                    break
-            waited += 1
-            
-        if waited >= max_wait:
-            log_error(logger, "Timeout waiting for swap to disable")
-            subprocess.run(['sudo', 'swapon', '-a'], capture_output=True)
-            return
-            
-        console.print(f"[green]✓ SWAP disabled after {waited} seconds[/green]")
-        log_swap(logger, f"SWAP disabled after {waited} seconds")
-        
-        # Wait before re-enabling (configurable)
-        console.print(f"[cyan]Waiting {wait_time} seconds before re-enabling...[/cyan]")
-        time.sleep(wait_time)
-        
-        # Re-enable swap
-        console.print("[cyan]Re-enabling SWAP...[/cyan]")
-        result = subprocess.run(['sudo', 'swapon', '-a'], capture_output=True, text=True)
-        if result.returncode != 0:
-            log_error(logger, f"Failed to re-enable swap: {result.stderr}")
-            return
-            
-        console.print("[green]✓ SWAP re-enabled successfully[/green]")
-        log_swap(logger, f"SWAP cleanup completed (waited {wait_time}s between operations)")
-        
-        # Show final status
-        console.print("\n[bold]Final SWAP status:[/bold]")
-        subprocess.run(['free', '-h'], shell=False)
-        
-    except Exception as e:
-        log_error(logger, f"Error during SWAP cleanup: {str(e)}")
         try:
-            subprocess.run(['sudo', 'swapon', '-a'], capture_output=True)
-        except:
-            pass
+            result = subprocess.run(['free', '-h'], capture_output=True, text=True)
+            if 'Swap' not in result.stdout:
+                log_warning(logger, "No swap configured on system")
+                return
+                
+            console.print("\n[bold]Current SWAP status:[/bold]")
+            subprocess.run(['free', '-h'], shell=False)
+            
+            from rich.prompt import Confirm
+            if not Confirm.ask("[bold yellow]This will temporarily disable SWAP. Continue?[/bold yellow]", default=False):
+                console.print("[yellow]Operation cancelled[/yellow]")
+                return
+                
+            console.print("\n[cyan]Disabling SWAP...[/cyan]")
+            
+            result = subprocess.run(['sudo', 'swapoff', '-a'], capture_output=True, text=True)
+            if result.returncode != 0:
+                log_error(logger, f"Failed to disable swap: {result.stderr}")
+                return
+                
+            console.print("[cyan]Waiting for SWAP to be fully disabled...[/cyan]")
+            max_wait = 30
+            waited = 0
+            while waited < max_wait:
+                time.sleep(1)
+                with open('/proc/swaps', 'r') as f:
+                    if len(f.readlines()) <= 1:
+                        break
+                waited += 1
+                
+            if waited >= max_wait:
+                log_error(logger, "Timeout waiting for swap to disable")
+                subprocess.run(['sudo', 'swapon', '-a'], capture_output=True)
+                return
+                
+            console.print(f"[green]✓ SWAP disabled after {waited} seconds[/green]")
+            log_swap(logger, f"SWAP disabled after {waited} seconds")
+            
+            console.print(f"[cyan]Waiting {swap_wait_seconds} seconds before re-enabling...[/cyan]")
+            time.sleep(swap_wait_seconds)
+            
+            console.print("[cyan]Re-enabling SWAP...[/cyan]")
+            result = subprocess.run(['sudo', 'swapon', '-a'], capture_output=True, text=True)
+            if result.returncode != 0:
+                log_error(logger, f"Failed to re-enable swap: {result.stderr}")
+                return
+                
+            console.print("[green]✓ SWAP re-enabled successfully[/green]")
+            log_swap(logger, f"SWAP cleanup completed (waited {swap_wait_seconds}s between operations)")
+            
+            console.print("\n[bold]Final SWAP status:[/bold]")
+            subprocess.run(['free', '-h'], shell=False)
+            
+        except Exception as e:
+            log_error(logger, f"Error during SWAP cleanup: {str(e)}")
+            try:
+                subprocess.run(['sudo', 'swapon', '-a'], capture_output=True)
+            except:
+                pass
 
     def systemd_keepalive_status(self):
         """Check keepalive service status"""
