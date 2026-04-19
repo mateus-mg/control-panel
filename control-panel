@@ -1,26 +1,50 @@
 #!/usr/bin/env bash
-# control-panel wrapper - NEW VERSION WITH PYTHON CLI
-# Uses Python CLI with Rich interface and structured logging
+# control-panel wrapper - Auto-syncs scripts from HD when mounted
 
-# Resolve the real script path, even when called via symlink
-REAL_SCRIPT_PATH="$(readlink -f "$0")"
-PROJECT_DIR="$(dirname "$REAL_SCRIPT_PATH")"
+PROJECT_DIR="/media/mateus/Servidor/scripts/control-panel"
+HOME_SCRIPTS_DIR="$HOME/scripts"
 
-# Change to project directory
-cd "$PROJECT_DIR" || {
-    echo "Error: Could not access project directory: $PROJECT_DIR" >&2
-    exit 1
+# Auto-sync function - copies scripts from HD to ~/scripts/
+auto_sync() {
+    if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/scripts/cli_manager.py" ]; then
+        if [ -f "$PROJECT_DIR/scripts/log_config.py" ]; then
+            cp -p "$PROJECT_DIR/scripts/cli_manager.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+            cp -p "$PROJECT_DIR/scripts/log_config.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+            cp -p "$PROJECT_DIR/scripts/log_formatter.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+            cp -p "$PROJECT_DIR/scripts/backup_cli.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+            cp -p "$PROJECT_DIR/scripts/backup_config.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+            cp -p "$PROJECT_DIR/scripts/backup_daemon.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+            cp -p "$PROJECT_DIR/scripts/backup_manager.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+            return 0
+        fi
+    fi
+    return 1
 }
 
-# Check and activate virtual environment
-if [ -d "venv" ] && [ -f "venv/bin/activate" ]; then
-    source venv/bin/activate
+# Create ~/scripts if it doesn't exist
+mkdir -p "$HOME_SCRIPTS_DIR" 2>/dev/null
+
+# Auto-sync from HD if mounted
+auto_sync
+
+# Check if home scripts exist after sync attempt
+if [ ! -f "$HOME_SCRIPTS_DIR/cli_manager.py" ]; then
+    echo "✗ ERROR: Cannot find control-panel scripts in ~/scripts/"
+    echo ""
+    echo "💡 SOLUTIONS:"
+    echo "   1. Run: control-panel sync"
+    echo "   2. Or manually copy:"
+    echo "      mkdir -p ~/scripts"
+    echo "      cp /media/mateus/Servidor/scripts/control-panel/scripts/*.py ~/scripts/"
+    exit 1
 fi
 
-# Execute the CLI manager
-# If no arguments provided, default to interactive mode
-if [ $# -eq 0 ]; then
-    exec python3 scripts/cli_manager.py "interactive"
-else
+# Try to use project venv if HD is mounted
+if [ -d "$PROJECT_DIR/venv" ] && [ -f "$PROJECT_DIR/venv/bin/activate" ]; then
+    source "$PROJECT_DIR/venv/bin/activate"
+    cd "$PROJECT_DIR"
     exec python3 scripts/cli_manager.py "$@"
 fi
+
+# Fallback: use system Python with home scripts
+exec python3 "$HOME_SCRIPTS_DIR/cli_manager.py" "$@"
