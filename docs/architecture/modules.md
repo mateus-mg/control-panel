@@ -2,37 +2,28 @@
 
 ## Module Relationships
 
-```mermaid
-flowchart TB
-    subgraph CLI
-        CLI["cli_manager.py"]
-        BACKUP_CLI["backup_cli.py"]
-    end
+The system consists of these Python modules organized by responsibility:
 
-    subgraph Backup
-        BACKUP_MGR["backup_manager.py"]
-        BACKUP_CONFIG["backup_config.py"]
-        BACKUP_DAEMON["backup_daemon.py"]
-    end
-
-    subgraph Logging
-        LOG_CONFIG["log_config.py"]
-        LOG_FORMATTER["log_formatter.py"]
-    end
-
-    CLI --> BACKUP_CLI
-    BACKUP_CLI --> BACKUP_MGR
-    BACKUP_CLI --> BACKUP_DAEMON
-    BACKUP_CLI --> BACKUP_CONFIG
-    BACKUP_DAEMON --> BACKUP_MGR
-    BACKUP_DAEMON --> BACKUP_CONFIG
-    BACKUP_MGR --> BACKUP_CONFIG
-    CLI --> LOG_CONFIG
-    BACKUP_CLI --> LOG_CONFIG
-    BACKUP_DAEMON --> LOG_CONFIG
-    BACKUP_MGR --> LOG_CONFIG
-    LOG_CONFIG --> LOG_FORMATTER
 ```
+CLI Layer
+├── cli_manager.py        # Main entry point, interactive menus
+└── backup_cli.py        # Backup subsystem CLI
+
+Backup Subsystem
+├── backup_manager.py     # Backup execution (rsync)
+├── backup_config.py      # Configuration persistence
+└── backup_daemon.py     # Background scheduler
+
+Logging
+├── log_config.py        # Centralized logging
+└── log_formatter.py     # Structured formatting
+```
+
+**Dependencies:**
+- `backup_cli.py` imports from `backup_manager`, `backup_config`, `backup_daemon`
+- All modules use `log_config.py` for logging
+
+---
 
 ## cli_manager.py
 
@@ -42,6 +33,7 @@ flowchart TB
 - `CLIManager`: Main CLI controller
 
 **Key Methods:**
+
 | Method | Description |
 |--------|-------------|
 | `show_interactive_menu()` | Display main menu loop |
@@ -55,13 +47,15 @@ flowchart TB
 | `stop_docker_interactive()` | Stop Docker containers |
 | `keepalive_hd_interactive()` | Monitor and keep HD active |
 
-**Configuration:**
+**Configuration Example:**
 ```python
 hd_mount_point = "/media/<username>/<drive>"
 hd_uuid = "<your-hd-uuid>"
 hd_label = "<your-drive-label>"
 docker_compose_dir = Path.home() / "path/to/docker-compose"
 ```
+
+---
 
 ## backup_cli.py
 
@@ -71,15 +65,24 @@ docker_compose_dir = Path.home() / "path/to/docker-compose"
 - `BackupCLI`: Backup command handler
 
 **Key Methods:**
+
 | Method | Description |
 |--------|-------------|
-| `daemon_start/stop/restart()` | Manage backup daemon |
+| `daemon_start()` | Start backup daemon |
+| `daemon_stop()` | Stop backup daemon |
+| `daemon_restart()` | Restart backup daemon |
+| `daemon_status()` | Show daemon status |
 | `set_destination()` | Configure backup location |
-| `add_source()` / `remove_source()` | Manage backup sources |
+| `add_source()` | Add backup source |
+| `remove_source()` | Remove backup source |
 | `list_sources()` | List configured sources |
 | `run_backup()` | Execute manual backup |
-| `show_stats()` / `show_history()` | View backup information |
-| `set_schedule()` / `set_retention()` | Configure policies |
+| `show_stats()` | View backup statistics |
+| `show_history()` | View backup history |
+| `set_schedule()` | Configure global schedule |
+| `set_retention()` | Configure retention policy |
+
+---
 
 ## backup_manager.py
 
@@ -89,6 +92,7 @@ docker_compose_dir = Path.home() / "path/to/docker-compose"
 - `BackupManager`: Backup orchestration
 
 **Key Methods:**
+
 | Method | Description |
 |--------|-------------|
 | `run_backup(source)` | Execute backup for source(s) |
@@ -97,12 +101,15 @@ docker_compose_dir = Path.home() / "path/to/docker-compose"
 | `_parse_rsync_stats()` | Parse backup statistics |
 | `cleanup_old_backups()` | Apply retention policy |
 | `verify_backup()` | Validate backup integrity |
-| `restore_file()` / `restore_directory()` | Restore from backup |
+| `restore_file()` | Restore single file |
+| `restore_directory()` | Restore directory |
 
 **Backup Types:**
 - `daily`: Regular backups (all other days)
 - `weekly`: Sunday backups
 - `monthly`: 1st of month backups
+
+---
 
 ## backup_config.py
 
@@ -115,12 +122,14 @@ docker_compose_dir = Path.home() / "path/to/docker-compose"
 - `BackupConfigManager`: Configuration CRUD operations
 
 **Key Methods:**
+
 | Method | Description |
 |--------|-------------|
 | `set_backup_destination()` | Set backup location |
 | `set_schedule()` | Configure global schedule |
 | `set_retention()` | Configure retention policy |
-| `add_source()` / `remove_source()` | Manage sources |
+| `add_source()` | Add backup source |
+| `remove_source()` | Remove backup source |
 | `get_enabled_sources()` | Get active sources |
 | `set_source_schedule()` | Per-source schedule |
 | `set_source_retention()` | Per-source retention |
@@ -128,6 +137,8 @@ docker_compose_dir = Path.home() / "path/to/docker-compose"
 | `check_destination_space()` | Verify available space |
 
 **Config Location:** `~/.local/share/control-panel/backup/.backup_config`
+
+---
 
 ## backup_daemon.py
 
@@ -137,6 +148,7 @@ docker_compose_dir = Path.home() / "path/to/docker-compose"
 - `BackupDaemon`: Background scheduler
 
 **Key Methods:**
+
 | Method | Description |
 |--------|-------------|
 | `run()` | Main daemon loop |
@@ -153,16 +165,24 @@ docker_compose_dir = Path.home() / "path/to/docker-compose"
 5. Sleep until next check (max 60 seconds)
 6. Repeat
 
+---
+
 ## log_config.py
 
 **Purpose:** Centralized logging with rotation.
 
 **Key Functions:**
+
 | Function | Description |
 |----------|-------------|
 | `get_logger(name)` | Get or create logger instance |
-| `log_success/error/warning/info()` | Formatted logging helpers |
-| `log_mount/docker/systemd()` | Domain-specific logging |
+| `log_success()` | Log success message |
+| `log_error()` | Log error message |
+| `log_warning()` | Log warning message |
+| `log_info()` | Log info message |
+| `log_mount()` | Log mount operation |
+| `log_docker()` | Log Docker operation |
+| `log_systemd()` | Log systemd operation |
 | `set_request_id()` | Enable operation tracking |
 | `is_verbose_logging()` | Check DEBUG level |
 | `set_console_log_level()` | Suppress console output |
@@ -171,6 +191,8 @@ docker_compose_dir = Path.home() / "path/to/docker-compose"
 - Console: Rich-formatted output
 - File: `~/.local/share/control-panel/control_panel.log`
 - Rotation: 10MB max, 5 backup files
+
+---
 
 ## log_formatter.py
 
@@ -181,6 +203,7 @@ docker_compose_dir = Path.home() / "path/to/docker-compose"
 - `LogBuilder`: Fluent log builder
 
 **Key Methods (LogSection):**
+
 | Method | Description |
 |--------|-------------|
 | `major_header()` | Section header (level 1) |
