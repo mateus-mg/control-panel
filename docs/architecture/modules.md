@@ -3,21 +3,21 @@
 ## Module Relationships
 
 ```mermaid
-graph TB
+flowchart TB
     subgraph CLI
-        CLI[cli_manager.py]
-        BACKUP_CLI[backup_cli.py]
+        CLI["cli_manager.py"]
+        BACKUP_CLI["backup_cli.py"]
     end
 
     subgraph Backup
-        BACKUP_MGR[backup_manager.py]
-        BACKUP_CONFIG[backup_config.py]
-        BACKUP_DAEMON[backup_daemon.py]
+        BACKUP_MGR["backup_manager.py"]
+        BACKUP_CONFIG["backup_config.py"]
+        BACKUP_DAEMON["backup_daemon.py"]
     end
 
     subgraph Logging
-        LOG_CONFIG[log_config.py]
-        LOG_FORMATTER[log_formatter.py]
+        LOG_CONFIG["log_config.py"]
+        LOG_FORMATTER["log_formatter.py"]
     end
 
     CLI --> BACKUP_CLI
@@ -57,10 +57,10 @@ graph TB
 
 **Configuration:**
 ```python
-hd_mount_point = "/media/mateus/Servidor"
-hd_uuid = "35feb867-8ee2-49a9-a1a5-719a67e3975a"
-hd_label = "Servidor"
-docker_compose_dir = Path("/home/mateus")
+hd_mount_point = "/media/<username>/<drive>"
+hd_uuid = "<your-hd-uuid>"
+hd_label = "<your-drive-label>"
+docker_compose_dir = Path.home() / "path/to/docker-compose"
 ```
 
 ## backup_cli.py

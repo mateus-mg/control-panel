@@ -60,10 +60,10 @@ sudo systemctl start backup-daemon.service
 Edit configuration in `scripts/cli_manager.py`:
 
 ```python
-self.hd_mount_point = "/media/mateus/Servidor"
-self.hd_uuid = "35feb867-8ee2-49a9-a1a5-719a67e3975a"
-self.hd_label = "Servidor"
-self.docker_compose_dir = Path("/home/mateus")
+self.hd_mount_point = "/media/<username>/<drive>"
+self.hd_uuid = "<your-hd-uuid>"
+self.hd_label = "<your-drive-label>"
+self.docker_compose_dir = Path.home() / "path/to/docker-compose"
 ```
 
 Or in `scripts/backup_config.py` for backup settings.

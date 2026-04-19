@@ -33,7 +33,7 @@ Automatically removes old backups based on:
 ### Set Backup Destination
 
 ```bash
-control-panel backup set-destination /media/mateus/Servidor backups
+control-panel backup set-destination /media/<username>/<drive> backups
 ```
 
 ### Configure Global Schedule
