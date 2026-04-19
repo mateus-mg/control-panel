@@ -19,6 +19,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.pytest_cache/
 
 # Virtual Environment
 venv/
@@ -49,3 +50,6 @@ Thumbs.db
 *.tmp
 *.bak
 .worktrees/
+
+# MkDocs
+site/
