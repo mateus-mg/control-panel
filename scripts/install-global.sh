@@ -36,15 +36,38 @@ else
     echo "📝 Creating wrapper script: $WRAPPER_NAME"
 fi
 
-# Create simplified wrapper script that uses ~/scripts/
-cat > "$PROJECT_DIR/$WRAPPER_NAME" << 'EOF'
+# Create wrapper script with auto-sync from HD
+cat > "$PROJECT_DIR/$WRAPPER_NAME" << 'WRAPPEREOF'
 #!/usr/bin/env bash
-# control-panel wrapper - Uses ~/scripts/ backup (no HD dependency)
+# control-panel wrapper - Auto-syncs scripts from HD when mounted
 
 PROJECT_DIR="/media/mateus/Servidor/scripts/control-panel"
 HOME_SCRIPTS_DIR="$HOME/scripts"
 
-# Check if home scripts exist
+# Auto-sync function - copies scripts from HD to ~/scripts/
+auto_sync() {
+    if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/scripts/cli_manager.py" ]; then
+        if [ -f "$PROJECT_DIR/scripts/log_config.py" ]; then
+            cp -p "$PROJECT_DIR/scripts/cli_manager.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+            cp -p "$PROJECT_DIR/scripts/log_config.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+            cp -p "$PROJECT_DIR/scripts/log_formatter.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+            cp -p "$PROJECT_DIR/scripts/backup_cli.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+            cp -p "$PROJECT_DIR/scripts/backup_config.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+            cp -p "$PROJECT_DIR/scripts/backup_daemon.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+            cp -p "$PROJECT_DIR/scripts/backup_manager.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+            return 0
+        fi
+    fi
+    return 1
+}
+
+# Create ~/scripts if it doesn't exist
+mkdir -p "$HOME_SCRIPTS_DIR" 2>/dev/null
+
+# Auto-sync from HD if mounted
+auto_sync
+
+# Check if home scripts exist after sync attempt
 if [ ! -f "$HOME_SCRIPTS_DIR/cli_manager.py" ]; then
     echo "✗ ERROR: Cannot find control-panel scripts in ~/scripts/"
     echo ""
@@ -65,7 +88,7 @@ fi
 
 # Fallback: use system Python with home scripts
 exec python3 "$HOME_SCRIPTS_DIR/cli_manager.py" "$@"
-EOF
+WRAPPEREOF
 
 # Make wrapper executable
 chmod +x "$PROJECT_DIR/$WRAPPER_NAME"
