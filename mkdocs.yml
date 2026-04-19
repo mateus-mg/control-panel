@@ -70,4 +70,7 @@ nav:
   - Reference:
     - reference/cli.md
   - Guides:
+    - guides/hd-management.md
+    - guides/docker-management.md
     - guides/backup-guide.md
+    - guides/systemd-services.md
