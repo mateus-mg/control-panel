@@ -17,10 +17,10 @@
 site_name: Control Panel Documentation
 site_description: Server management system for HD and Docker containers
 site_author: mateus
-site_url: https://mateus.github.io/control-panel
+site_url: https://mateus-mg.github.io/control-panel
 
-repo_name: mateus/control-panel
-repo_url: https://github.com/mateus/control-panel
+repo_name: mateus-mg/control-panel
+repo_url: https://github.com/mateus-mg/control-panel
 
 theme:
   name: material
@@ -76,7 +76,7 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/mateus
+      link: https://github.com/mateus-mg
   generator: false
 
 nav:
@@ -697,7 +697,7 @@ flowchart TD
 ### 1. Clone or Copy the Repository
 
 ```bash
-git clone https://github.com/mateus/control-panel.git
+git clone https://github.com/mateus-mg/control-panel.git
 cd control-panel
 ```
 
