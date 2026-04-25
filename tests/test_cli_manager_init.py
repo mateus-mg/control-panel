@@ -57,7 +57,7 @@ class TestCLIManagerInit:
         manager = CLIManager()
         root = manager._find_project_root()
         assert isinstance(root, Path)
-        assert str(root) == "/media/mateus/Servidor/scripts/control-panel"
+        assert root.name == "control-panel"
 
 
 class TestCLIManagerDocker:
