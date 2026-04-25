@@ -1,6 +1,6 @@
 [Unit]
 Description=Control Panel HD Keepalive Service
-Documentation=https://github.com/mateus/control-panel
+Documentation=https://github.com/mateus-mg/control-panel
 After=network.target hdmount.service
 Requires=hdmount.service
 Wants=hdmount.service
