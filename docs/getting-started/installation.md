@@ -13,7 +13,7 @@
 ### 1. Clone or Copy the Repository
 
 ```bash
-git clone https://github.com/mateus/control-panel.git
+git clone https://github.com/mateus-mg/control-panel.git
 cd control-panel
 ```
 

@@ -1,6 +1,6 @@
 [Unit]
 Description=Control Panel Backup Daemon
-Documentation=https://github.com/mateus/control-panel
+Documentation=https://github.com/mateus-mg/control-panel
 After=network.target local-fs.target
 
 [Service]

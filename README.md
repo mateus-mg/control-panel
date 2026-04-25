@@ -2,7 +2,7 @@
 
 Bash and Python system for managing external HD drives and Docker containers on a home server.
 
-> **Documentation:** Full documentation is now available at [https://mateus.github.io/control-panel](https://mateus.github.io/control-panel)
+> **Documentation:** Full documentation is now available at [https://mateus-mg.github.io/control-panel](https://mateus-mg.github.io/control-panel)
 
 ---
 
