@@ -1,0 +1,59 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  python-tests:
+    name: Python Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-test.txt
+          pip install rich
+
+      - name: Run tests
+        run: pytest tests/ -q
+
+  shell-lint:
+    name: Shell Script Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Lint shell scripts
+        run: |
+          find . -name "*.sh" \
+            -not -path "./venv/*" \
+            -not -path "./.worktrees/*" \
+            -not -path "./.git/*" \
+            | xargs shellcheck || true
+
+      - name: Validate main script syntax
+        run: bash -n control_panel.sh
+
+      - name: Validate wrapper syntax
+        run: bash -n control-panel
+
+      - name: Validate install scripts syntax
+        run: |
+          bash -n scripts/install-global.sh
+          bash -n scripts/install-service.sh
+          bash -n scripts/install-backup-service.sh
