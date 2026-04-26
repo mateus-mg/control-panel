@@ -16,8 +16,8 @@ auto_sync() {
             cp -p "$PROJECT_DIR/scripts/backup_daemon.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
             cp -p "$PROJECT_DIR/scripts/backup_manager.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
             # Also sync docker-compose.yml
-            if [ -f "$PROJECT_DIR/docker-compose.yml" ]; then
-                cp -p "$PROJECT_DIR/docker-compose.yml" "$HOME/" 2>/dev/null
+            if [ -f "/media/mateus/Servidor/scripts/docker-compose.yml" ]; then
+                cp -p "/media/mateus/Servidor/scripts/docker-compose.yml" "$HOME/" 2>/dev/null
             fi
             return 0
         fi
