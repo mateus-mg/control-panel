@@ -1256,8 +1256,10 @@ class CLIManager:
             source_scripts_dir = project_root / 'scripts'
             dest_scripts_dir = Path.home() / 'scripts'
 
-            python_files = ['cli_manager.py',
-                            'log_config.py', 'log_formatter.py']
+            python_files = ['cli_manager.py', 'log_config.py',
+                            'log_formatter.py', 'backup_cli.py',
+                            'backup_config.py', 'backup_daemon.py',
+                            'backup_manager.py']
             for py_file in python_files:
                 source_file = source_scripts_dir / py_file
                 dest_file = dest_scripts_dir / py_file
@@ -1297,16 +1299,37 @@ class CLIManager:
             # Create bash wrapper only if it doesn't exist or content changed
             dest_wrapper = Path.home() / '.local' / 'bin' / 'control-panel'
             wrapper_content = '''#!/usr/bin/env bash
-# control-panel wrapper - Uses home scripts backup (no HD dependency)
-# Activates venv from project directory if available
+# control-panel wrapper - Auto-syncs scripts from HD when mounted
 
-# Get the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Project directory is parent of script directory (assuming script is in ~/.local/bin)
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")/scripts/control-panel"
+PROJECT_DIR="/media/mateus/Servidor/scripts/control-panel"
 HOME_SCRIPTS_DIR="$HOME/scripts"
 
-# Check if home scripts exist
+# Auto-sync function - copies scripts from HD to ~/scripts/
+auto_sync() {
+    if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/scripts/cli_manager.py" ]; then
+        cp -p "$PROJECT_DIR/scripts/cli_manager.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+        cp -p "$PROJECT_DIR/scripts/log_config.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+        cp -p "$PROJECT_DIR/scripts/log_formatter.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+        cp -p "$PROJECT_DIR/scripts/backup_cli.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+        cp -p "$PROJECT_DIR/scripts/backup_config.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+        cp -p "$PROJECT_DIR/scripts/backup_daemon.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+        cp -p "$PROJECT_DIR/scripts/backup_manager.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
+        # Also sync docker-compose.yml
+        if [ -f "/media/mateus/Servidor/scripts/docker-compose.yml" ]; then
+            cp -p "/media/mateus/Servidor/scripts/docker-compose.yml" "$HOME/" 2>/dev/null
+        fi
+        return 0
+    fi
+    return 1
+}
+
+# Create ~/scripts if it doesn't exist
+mkdir -p "$HOME_SCRIPTS_DIR" 2>/dev/null
+
+# Auto-sync from HD if mounted
+auto_sync
+
+# Check if home scripts exist after sync attempt
 if [ ! -f "$HOME_SCRIPTS_DIR/cli_manager.py" ]; then
     echo "✗ ERROR: Cannot find control-panel scripts in ~/scripts/"
     echo ""
