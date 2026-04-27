@@ -118,13 +118,20 @@ control-panel sync
 ```
 
 This command performs the following actions:
-1. Copies the `control_panel.sh` script and `docker-compose.yml` from the external HD to the home directory.
-2. Creates or updates a global symlink at `/usr/local/bin/control-panel` pointing to the script.
-3. Ensures the files are up-to-date before copying.
+1. Copies all Python scripts (`cli_manager.py`, `log_config.py`, `log_formatter.py`, and backup modules) from the project directory to `~/scripts/`.
+2. Copies `control_panel.sh` to `~/scripts/` as a backup.
+3. Copies `docker-compose.yml` to the home directory.
+4. Creates or updates the wrapper at `~/.local/bin/control-panel`.
+
+> **Note:** The `docker-compose.yml` file should be located at a configured path accessible to the system (e.g., alongside your project directory or external drive).
+
+### Automatic Sync
+
+The installed wrapper (`~/.local/bin/control-panel`) includes an `auto_sync()` function. Every time you run `control-panel` while the external HD is mounted, it automatically refreshes the files in `~/scripts/` to ensure they are up-to-date.
 
 ### Example
 ```bash
-control-panel sync  # Synchronize files and update symlink
+control-panel sync  # Synchronize files and update wrapper
 ```
 
 

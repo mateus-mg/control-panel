@@ -78,8 +78,23 @@ control-panel [command] [options]
 | Command | Description |
 |---------|-------------|
 | `control-panel view-logs [n]` | View script logs |
-| `control-panel sync` | Sync scripts to ~/scripts |
+| `control-panel sync` | Sync all scripts to `~/scripts/` and update wrapper |
 | `control-panel diagnose` | Full diagnostic |
+
+## Detailed Command Descriptions
+
+### `control-panel sync`
+
+Synchronizes all essential files from the project directory to your home directory, enabling offline operation.
+
+**What it copies:**
+- All Python scripts (`cli_manager.py`, `log_config.py`, `log_formatter.py`, `backup_cli.py`, `backup_config.py`, `backup_daemon.py`, `backup_manager.py`) → `~/scripts/`
+- `control_panel.sh` → `~/scripts/`
+- `docker-compose.yml` → home directory
+- Updates the wrapper at `~/.local/bin/control-panel`
+
+**Automatic behavior:**
+The installed wrapper runs `auto_sync()` on every invocation while the external HD is mounted, ensuring `~/scripts/` always contains the latest versions.
 
 ## Options
 

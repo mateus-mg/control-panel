@@ -80,6 +80,30 @@ control-panel fix
 
 Repairs mount point permissions and structure.
 
+## File Synchronization
+
+When the external HD is mounted, the Control Panel can synchronize essential files to your home directory for offline operation.
+
+### How It Works
+
+- The wrapper script (`~/.local/bin/control-panel`) includes an `auto_sync()` function.
+- Every time you run `control-panel` while the HD is mounted, it automatically copies the latest Python scripts to `~/scripts/`.
+- This ensures that even if the HD is disconnected later, the system can still operate using the cached copies.
+
+### Manual Sync
+
+To force a sync at any time:
+
+```bash
+control-panel sync
+```
+
+This will:
+- Copy all Python scripts to `~/scripts/` (CLI, logging, and backup modules)
+- Copy `control_panel.sh` to `~/scripts/`
+- Copy `docker-compose.yml` to the home directory
+- Update the wrapper at `~/.local/bin/control-panel`
+
 ## Keepalive Mode
 
 Keepalive prevents the drive from sleeping and ensures it remounts if disconnected.

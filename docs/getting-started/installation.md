@@ -27,9 +27,13 @@ The `sync` command copies scripts to `~/scripts/` and creates a global symlink:
 
 This will:
 - Create `~/scripts/` directory
-- Copy Python scripts to `~/scripts/`
-- Create symlink at `~/.local/bin/control-panel`
+- Copy all Python scripts to `~/scripts/` (including CLI, logging, and backup modules)
+- Copy `control_panel.sh` to `~/scripts/` as a backup
+- Copy `docker-compose.yml` to the home directory
+- Create or update the wrapper at `~/.local/bin/control-panel`
 - Verify installation
+
+> **Offline Operation:** After the initial sync, the system can operate without the external HD connected because all necessary scripts are cached in `~/scripts/`. The wrapper automatically re-syncs when the HD is mounted again.
 
 ### 3. Verify Installation
 
