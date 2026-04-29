@@ -434,7 +434,8 @@ class TestBackupManagerSpace:
 
     def test_get_space_info(self, backup_manager, tmp_path):
         """Test getting detailed space information."""
-        # Ensure backup directory exists
+        # Configure destination and ensure backup directory exists
+        backup_manager.config_manager.set_backup_destination(str(tmp_path), 'backups')
         backup_dir = tmp_path / 'backups'
         backup_dir.mkdir(parents=True, exist_ok=True)
         (backup_dir / 'daily').mkdir(exist_ok=True)
