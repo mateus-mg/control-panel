@@ -30,8 +30,12 @@ class TestBackupManagerInit:
     def config_manager(self, tmp_path, monkeypatch):
         """Create a BackupConfigManager with temp directory."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            manager = BackupConfigManager()
-            yield manager
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                manager = BackupConfigManager()
+                # Override destination to use temp path
+                manager.config['destination']['base_path'] = str(tmp_path)
+                manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                yield manager
 
     def test_initialization_with_rsync(self, config_manager):
         """Test that BackupManager initializes when rsync is available."""
@@ -53,9 +57,13 @@ class TestBackupManagerBackupType:
     def backup_manager(self, tmp_path, monkeypatch):
         """Create a BackupManager with mocked dependencies."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            with patch('shutil.which', return_value='/usr/bin/rsync'):
-                manager = BackupManager()
-                yield manager
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                with patch('shutil.which', return_value='/usr/bin/rsync'):
+                    manager = BackupManager()
+                    # Override destination to use temp path
+                    manager.config_manager.config['destination']['base_path'] = str(tmp_path)
+                    manager.config_manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                    yield manager
 
     def test_get_backup_type_monthly(self, backup_manager):
         """Test monthly backup on 1st of month."""
@@ -85,9 +93,13 @@ class TestBackupManagerShouldBackup:
     def backup_manager(self, tmp_path, monkeypatch):
         """Create a BackupManager with mocked dependencies."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            with patch('shutil.which', return_value='/usr/bin/rsync'):
-                manager = BackupManager()
-                yield manager
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                with patch('shutil.which', return_value='/usr/bin/rsync'):
+                    manager = BackupManager()
+                    # Override destination to use temp path
+                    manager.config_manager.config['destination']['base_path'] = str(tmp_path)
+                    manager.config_manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                    yield manager
 
     def test_should_backup_now_disabled(self, backup_manager):
         """Test that disabled schedule prevents backup."""
@@ -187,9 +199,13 @@ class TestBackupManagerRsyncStats:
     def backup_manager(self, tmp_path, monkeypatch):
         """Create a BackupManager with mocked dependencies."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            with patch('shutil.which', return_value='/usr/bin/rsync'):
-                manager = BackupManager()
-                yield manager
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                with patch('shutil.which', return_value='/usr/bin/rsync'):
+                    manager = BackupManager()
+                    # Override destination to use temp path
+                    manager.config_manager.config['destination']['base_path'] = str(tmp_path)
+                    manager.config_manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                    yield manager
 
     def test_parse_rsync_stats_complete(self, backup_manager):
         """Test parsing complete rsync stats output."""
@@ -275,9 +291,13 @@ class TestBackupManagerVerify:
     def backup_manager(self, tmp_path, monkeypatch):
         """Create a BackupManager with mocked dependencies."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            with patch('shutil.which', return_value='/usr/bin/rsync'):
-                manager = BackupManager()
-                yield manager
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                with patch('shutil.which', return_value='/usr/bin/rsync'):
+                    manager = BackupManager()
+                    # Override destination to use temp path
+                    manager.config_manager.config['destination']['base_path'] = str(tmp_path)
+                    manager.config_manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                    yield manager
 
     def test_verify_backup_valid(self, backup_manager, tmp_path):
         """Test verifying a valid backup."""
@@ -324,9 +344,13 @@ class TestBackupManagerRestore:
     def backup_manager(self, tmp_path, monkeypatch):
         """Create a BackupManager with mocked dependencies."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            with patch('shutil.which', return_value='/usr/bin/rsync'):
-                manager = BackupManager()
-                yield manager
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                with patch('shutil.which', return_value='/usr/bin/rsync'):
+                    manager = BackupManager()
+                    # Override destination to use temp path
+                    manager.config_manager.config['destination']['base_path'] = str(tmp_path)
+                    manager.config_manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                    yield manager
 
     def test_restore_file(self, backup_manager, tmp_path):
         """Test restoring a single file."""

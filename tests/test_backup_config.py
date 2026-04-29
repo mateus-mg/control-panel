@@ -33,8 +33,12 @@ class TestBackupConfigManagerInit:
     def config_manager(self, tmp_path, monkeypatch):
         """Create a BackupConfigManager with temp directory."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            manager = BackupConfigManager()
-            yield manager
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                manager = BackupConfigManager()
+                # Override destination to use temp path
+                manager.config['destination']['base_path'] = str(tmp_path)
+                manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                yield manager
 
     def test_initialization_creates_config_files(self, config_manager, tmp_path):
         """Test that initialization creates config and state files."""
@@ -85,8 +89,12 @@ class TestBackupConfigDestination:
     def config_manager(self, tmp_path, monkeypatch):
         """Create a BackupConfigManager with temp directory."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            manager = BackupConfigManager()
-            yield manager
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                manager = BackupConfigManager()
+                # Override destination to use temp path
+                manager.config['destination']['base_path'] = str(tmp_path)
+                manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                yield manager
 
     def test_set_backup_destination_valid_path(self, config_manager, tmp_path):
         """Test setting destination with valid path."""
@@ -107,9 +115,10 @@ class TestBackupConfigDestination:
 
     def test_check_destination_space(self, config_manager, tmp_path):
         """Test checking destination space."""
-        test_path = str(tmp_path / 'backups')
-        Path(test_path).mkdir(parents=True, exist_ok=True)
-        config_manager.set_backup_destination(test_path)
+        # set_backup_destination joins base_path + backup_folder
+        base_path = str(tmp_path)
+        (tmp_path / 'backups').mkdir(parents=True, exist_ok=True)
+        config_manager.set_backup_destination(base_path, 'backups')
 
         space = config_manager.check_destination_space()
         assert space['exists'] is True
@@ -126,8 +135,12 @@ class TestBackupConfigSchedule:
     def config_manager(self, tmp_path, monkeypatch):
         """Create a BackupConfigManager with temp directory."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            manager = BackupConfigManager()
-            yield manager
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                manager = BackupConfigManager()
+                # Override destination to use temp path
+                manager.config['destination']['base_path'] = str(tmp_path)
+                manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                yield manager
 
     def test_set_schedule_valid(self, config_manager):
         """Test setting schedule with valid parameters."""
@@ -185,8 +198,12 @@ class TestBackupConfigRetention:
     def config_manager(self, tmp_path, monkeypatch):
         """Create a BackupConfigManager with temp directory."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            manager = BackupConfigManager()
-            yield manager
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                manager = BackupConfigManager()
+                # Override destination to use temp path
+                manager.config['destination']['base_path'] = str(tmp_path)
+                manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                yield manager
 
     def test_set_retention_valid(self, config_manager):
         """Test setting retention with valid parameters."""
@@ -215,8 +232,12 @@ class TestBackupConfigSources:
     def config_manager(self, tmp_path, monkeypatch):
         """Create a BackupConfigManager with temp directory."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            manager = BackupConfigManager()
-            yield manager
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                manager = BackupConfigManager()
+                # Override destination to use temp path
+                manager.config['destination']['base_path'] = str(tmp_path)
+                manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                yield manager
 
     @pytest.fixture
     def test_source_dir(self, tmp_path):
@@ -312,8 +333,12 @@ class TestBackupConfigState:
     def config_manager(self, tmp_path, monkeypatch):
         """Create a BackupConfigManager with temp directory."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            manager = BackupConfigManager()
-            yield manager
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                manager = BackupConfigManager()
+                # Override destination to use temp path
+                manager.config['destination']['base_path'] = str(tmp_path)
+                manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                yield manager
 
     def test_update_state(self, config_manager):
         """Test updating state."""
@@ -349,8 +374,12 @@ class TestBackupConfigPersistence:
     def config_manager(self, tmp_path, monkeypatch):
         """Create a BackupConfigManager with temp directory."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            manager = BackupConfigManager()
-            yield manager
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                manager = BackupConfigManager()
+                # Override destination to use temp path
+                manager.config['destination']['base_path'] = str(tmp_path)
+                manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                yield manager
 
     def test_config_saved_to_disk(self, config_manager, tmp_path):
         """Test that config is saved to disk."""

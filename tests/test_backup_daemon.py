@@ -21,6 +21,7 @@ log_config_mock.log_info = MagicMock()
 sys.modules['log_config'] = log_config_mock
 
 from scripts.backup_daemon import BackupDaemon
+from scripts.backup_config import BackupConfigManager
 
 
 class TestBackupDaemonInit:
@@ -30,8 +31,13 @@ class TestBackupDaemonInit:
     def daemon(self, tmp_path, monkeypatch):
         """Create a BackupDaemon with temp directory."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            daemon = BackupDaemon()
-            yield daemon
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                with patch('signal.signal'):
+                    daemon = BackupDaemon()
+                    # Override destination to use temp path
+                    daemon.config_manager.config['destination']['base_path'] = str(tmp_path)
+                    daemon.config_manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                    yield daemon
 
     def test_initialization(self, daemon, tmp_path):
         """Test that daemon initializes correctly."""
@@ -54,8 +60,13 @@ class TestBackupDaemonSignalHandling:
     def daemon(self, tmp_path, monkeypatch):
         """Create a BackupDaemon with temp directory."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            daemon = BackupDaemon()
-            yield daemon
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                with patch('signal.signal'):
+                    daemon = BackupDaemon()
+                    # Override destination to use temp path
+                    daemon.config_manager.config['destination']['base_path'] = str(tmp_path)
+                    daemon.config_manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                    yield daemon
 
     def test_handle_sigterm(self, daemon):
         """Test SIGTERM handling."""
@@ -75,8 +86,13 @@ class TestBackupDaemonScheduling:
     def daemon(self, tmp_path, monkeypatch):
         """Create a BackupDaemon with temp directory."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            daemon = BackupDaemon()
-            yield daemon
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                with patch('signal.signal'):
+                    daemon = BackupDaemon()
+                    # Override destination to use temp path
+                    daemon.config_manager.config['destination']['base_path'] = str(tmp_path)
+                    daemon.config_manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                    yield daemon
 
     def test_should_run_backup_hourly(self, daemon):
         """Test hourly backup scheduling."""
@@ -188,8 +204,13 @@ class TestBackupDaemonSleepCalculation:
     def daemon(self, tmp_path, monkeypatch):
         """Create a BackupDaemon with temp directory."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            daemon = BackupDaemon()
-            yield daemon
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                with patch('signal.signal'):
+                    daemon = BackupDaemon()
+                    # Override destination to use temp path
+                    daemon.config_manager.config['destination']['base_path'] = str(tmp_path)
+                    daemon.config_manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                    yield daemon
 
     def test_calculate_sleep_time_no_sources(self, daemon):
         """Test sleep time with no sources."""
@@ -237,8 +258,13 @@ class TestBackupDaemonRun:
     def daemon(self, tmp_path, monkeypatch):
         """Create a BackupDaemon with temp directory."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            daemon = BackupDaemon()
-            yield daemon
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                with patch('signal.signal'):
+                    daemon = BackupDaemon()
+                    # Override destination to use temp path
+                    daemon.config_manager.config['destination']['base_path'] = str(tmp_path)
+                    daemon.config_manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                    yield daemon
 
     def test_run_creates_and_removes_pid_file(self, daemon, tmp_path):
         """Test that run creates PID file and removes it on exit."""
@@ -320,8 +346,13 @@ class TestBackupDaemonEdgeCases:
     def daemon(self, tmp_path, monkeypatch):
         """Create a BackupDaemon with temp directory."""
         with patch.object(Path, 'home', return_value=tmp_path):
-            daemon = BackupDaemon()
-            yield daemon
+            with patch.object(BackupConfigManager, '_ensure_backup_structure'):
+                with patch('signal.signal'):
+                    daemon = BackupDaemon()
+                    # Override destination to use temp path
+                    daemon.config_manager.config['destination']['base_path'] = str(tmp_path)
+                    daemon.config_manager.config['destination']['full_path'] = str(tmp_path / 'backups')
+                    yield daemon
 
     def test_run_with_backup_error(self, daemon, tmp_path):
         """Test handling backup execution errors."""
