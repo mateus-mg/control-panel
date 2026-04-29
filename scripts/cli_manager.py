@@ -1753,9 +1753,9 @@ def main():
             from backup_daemon import run_daemon
             run_daemon()
         elif command == "backup":
-            self.handle_backup_command(sys.argv[2:])
+            cli_manager.handle_backup_command(sys.argv[2:])
         elif command.startswith("backup-"):
-            self.handle_backup_command([command.replace("backup-", "")] + sys.argv[2:])
+            cli_manager.handle_backup_command([command.replace("backup-", "")] + sys.argv[2:])
         else:
             console.print(
                 f"[yellow]Command '{command}' not yet implemented in Python version[/yellow]")
