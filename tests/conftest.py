@@ -24,6 +24,17 @@ def mock_backup_structure():
     This prevents RuntimeError when /media/mateus/Servidor does not exist
     (e.g., in CI environments).
     """
-    from scripts.backup_config import BackupConfigManager
-    with patch.object(BackupConfigManager, '_ensure_backup_structure'):
-        yield
+    # Patch both possible module paths (local vs CI import)
+    patches = []
+    for module_name in ['scripts.backup_config', 'backup_config']:
+        try:
+            mod = __import__(module_name, fromlist=['BackupConfigManager'])
+            patches.append(patch.object(mod.BackupConfigManager, '_ensure_backup_structure'))
+        except (ImportError, AttributeError):
+            pass
+    
+    for p in patches:
+        p.start()
+    yield
+    for p in patches:
+        p.stop()
