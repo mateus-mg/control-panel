@@ -434,6 +434,10 @@ class TestBackupManagerSpace:
 
     def test_get_space_info(self, backup_manager, tmp_path):
         """Test getting detailed space information."""
+        # Ensure backup directory exists
+        backup_dir = tmp_path / 'backups'
+        backup_dir.mkdir(parents=True, exist_ok=True)
+        (backup_dir / 'daily').mkdir(exist_ok=True)
         info = backup_manager.get_space_info()
         assert 'total_gb' in info
         assert 'free_gb' in info
