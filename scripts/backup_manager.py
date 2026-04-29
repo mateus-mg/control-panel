@@ -11,7 +11,7 @@ import json
 import os
 import shutil
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 from backup_config import BackupConfigManager
 
