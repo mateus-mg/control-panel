@@ -74,7 +74,7 @@ Hybrid Bash/Python home server management system. Manages external HD mounts, Do
 
 ### Configuration
 - Backup config: XDG-compliant (`~/.local/share/control-panel/`)
-- Log file: `~/.control-panel.log` (not standard Python logging)
+- Log files: Bash wrapper/script → `~/.control-panel.log`; Python logger (`scripts/log_config.py`) → `~/.local/share/control-panel/control_panel.log`
 - Hardcoded paths: `/media/mateus/Servidor`, `/home/mateus`
 
 ### Documentation
