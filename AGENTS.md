@@ -30,7 +30,7 @@ Hybrid Bash/Python home server management system. Manages external HD mounts, Do
 
 | Task | Location | Notes |
 |------|----------|-------|
-| Add new CLI command | `scripts/cli_manager.py` | Add to `COMMANDS` dict + implement method |
+| Add new CLI command | `scripts/cli_manager.py` | Update the `main()` if/elif dispatch chain and any interactive menu handling; implement the command method |
 | Modify backup behavior | `scripts/backup_manager.py` | rsync logic, retention cleanup |
 | Change backup scheduling | `scripts/backup_daemon.py` | Cron-like scheduler loop |
 | Update backup config | `scripts/backup_config.py` | Persistence in `~/.local/share/control-panel/backup/` (`.backup_config`, `.backup_state.json`) |
