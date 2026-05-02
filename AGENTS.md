@@ -62,9 +62,9 @@ Hybrid Bash/Python home server management system. Manages external HD mounts, Do
 
 ### File Organization
 - **Bash**: Single monolithic script (`control_panel.sh`) over modular files
-- **Python**: Flat `scripts/` directory, NOT a package (no `__init__.py`)
+- **Python**: Flat `scripts/` directory, typically used without `__init__.py`
 - **Tests**: Mirror `scripts/` → `tests/` naming (e.g., `test_backup_manager.py`)
-- **Imports**: `from scripts.backup_config import X` (not relative)
+- **Imports**: Dual-mode. Use direct sibling imports like `from backup_config import X` when modules run with `scripts/` on `sys.path`; `scripts.*` imports may also work when `scripts` is imported as a namespace package. Follow the surrounding file's existing style, and do not assume a single import form is universal.
 
 ### Testing
 - Framework: pytest
