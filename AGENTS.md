@@ -56,7 +56,7 @@ Hybrid Bash/Python home server management system. Manages external HD mounts, Do
 | `BackupConfigManager` | `backup_config.py` | JSON config CRUD |
 | `BackupManager` | `backup_manager.py` | Execute rsync, manage retention |
 | `BackupDaemon` | `backup_daemon.py` | Background scheduler |
-| `LogConfig` | `log_config.py` | Structured logging setup |
+| `ControlPanelLogger` | `log_config.py` | Structured logging setup (`get_logger(...)` helper also exported) |
 
 ## CONVENTIONS
 
