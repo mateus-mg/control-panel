@@ -150,8 +150,9 @@ DOCKER_COMPOSE_DIR="/home/mateus"
 - Shellcheck runs but errors suppressed (`|| true`)
 
 ### Log Rotation
-- Main log keeps last 500 lines only
-- No automatic archiving — manual cleanup required
+- Main log uses size-based rotation via `RotatingFileHandler`
+- Log file rotates when it reaches 10 MB, keeping up to 5 backup files
+- Old logs are archived automatically as rotated log files
 
 ### Backup Storage Layout
 ```
