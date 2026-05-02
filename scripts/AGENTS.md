@@ -19,7 +19,7 @@ scripts/
 
 | Task | File | Notes |
 |------|------|-------|
-| Add backup subcommand | `backup_cli.py` | Add to `COMMANDS` dict |
+| Add backup subcommand | `backup_cli.py` | Add an argparse subparser and register it in the local `commands` mapping |
 | Change backup behavior | `backup_manager.py` | rsync args, retention logic |
 | Modify scheduling | `backup_daemon.py` | Cron-like loop, sleep intervals |
 | Update config schema | `backup_config.py` | JSON structure, validation |
