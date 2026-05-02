@@ -35,7 +35,7 @@ Hybrid Bash/Python home server management system. Manages external HD mounts, Do
 | Change backup scheduling | `scripts/backup_daemon.py` | Cron-like scheduler loop |
 | Update backup config | `scripts/backup_config.py` | Persistence in `~/.local/share/control-panel/backup/` (`.backup_config`, `.backup_state.json`) |
 | Add test for backup | `tests/test_backup_*.py` | Mirror scripts/ structure |
-| Change HD mount logic | `control_panel.sh` (lines 500-600) | UUID-based mounting |
+| Change HD mount logic | `control_panel.sh` | UUID-based mounting |
 | Modify Docker commands | `control_panel.sh` (lines 700+) | docker-compose wrapper |
 | Update docs | `docs/` | Auto-deploys to GitHub Pages |
 | Service configuration | `*.service` files | Hardcoded paths: `/home/mateus`, `/media/mateus/Servidor` |
