@@ -80,6 +80,7 @@ from scripts.backup_config import BackupConfigManager
 
 ```bash
 pytest tests/test_backup_config.py -v     # Run specific test
-pytest tests/ --cov=scripts               # Run with coverage
+pytest tests/                            # Run all tests
+pytest tests/ --cov=scripts              # Optional: run with coverage (requires pytest-cov)
 python3 -c "from scripts.backup_config import BackupConfigManager; print('OK')"
 ```
