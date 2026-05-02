@@ -34,8 +34,9 @@ scripts/
 - **One class per module:** Each `backup_*.py` exports one primary class
 
 ### Configuration
-- XDG Base Directory: `~/.local/share/control-panel/`
-- Config file: `backup_config.json`
+- Backup data directory: `~/.local/share/control-panel/backup/`
+- Config file: `.backup_config`
+- State/history files: `.backup_state.json`, `backup_history.json`
 - Backup destination path stored in config (not hardcoded)
 
 ## ANTI-PATTERNS
