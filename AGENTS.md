@@ -87,7 +87,7 @@ Hybrid Bash/Python home server management system. Manages external HD mounts, Do
 ### Code Quality Issues
 | Issue | Location | Fix |
 |-------|----------|-----|
-| Bare `except:` | `cli_manager.py:1057`, `backup_config.py` | Use `except Exception as e:` |
+| Bare `except:` | `cli_manager.py:1057` | Use `except Exception as e:` |
 | Catch-all `except Exception` | `cli_manager.py` (30+ times) | Catch specific exceptions |
 | Hardcoded user paths | `*.service` files, config | Extract to env vars |
 
