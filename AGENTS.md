@@ -46,8 +46,8 @@ Hybrid Bash/Python home server management system. Manages external HD mounts, Do
 | Symbol | Type | File | Role |
 |--------|------|------|------|
 | `control_panel.sh` | Script | root | Main orchestration (HD + Docker) |
-| `main()` | Function | `control-panel` | Wrapper: sync → venv → Python |
-| `ControlPanelCLI` | Class | `cli_manager.py` | Python command dispatcher |
+| `auto_sync()` | Function | `control-panel` | Wrapper: sync → venv → Python |
+| `CLIManager` | Class | `cli_manager.py` | Python command dispatcher |
 | `BackupCLI` | Class | `backup_cli.py` | Backup subcommand handler |
 
 ### Key Classes (Python)
