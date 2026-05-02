@@ -68,7 +68,7 @@ scripts/
 Every test file MUST mock `log_config` BEFORE importing backup modules:
 ```python
 sys.modules['log_config'] = MagicMock()
-sys.path.insert(0, str(Path(__file__).parent.parent / 'scripts'))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 from scripts.backup_config import BackupConfigManager
 ```
 
