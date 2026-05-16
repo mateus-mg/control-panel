@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-white">Dashboard</h2>
+        <p class="text-gray-400 mt-1">Visão geral do sistema</p>
+    </div>
+
+    <!-- Status Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-blue-500/20 rounded-lg">
+                    <i data-lucide="container" class="w-6 h-6 text-blue-400"></i>
+                </div>
+                <span class="text-green-400 text-sm font-medium">Online</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white">5</h3>
+            <p class="text-gray-400 text-sm">Containers Docker</p>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-green-500/20 rounded-lg">
+                    <i data-lucide="hard-drive" class="w-6 h-6 text-green-400"></i>
+                </div>
+                <span class="text-green-400 text-sm font-medium">Montado</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white">HD Externo</h3>
+            <p class="text-gray-400 text-sm">1.5TB disponível</p>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-purple-500/20 rounded-lg">
+                    <i data-lucide="archive" class="w-6 h-6 text-purple-400"></i>
+                </div>
+                <span class="text-yellow-400 text-sm font-medium">Último: 2d</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white">Backup</h3>
+            <p class="text-gray-400 text-sm">Último: 14/05</p>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-orange-500/20 rounded-lg">
+                    <i data-lucide="activity" class="w-6 h-6 text-orange-400"></i>
+                </div>
+                <span class="text-green-400 text-sm font-medium">Ativo</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white">Services</h3>
+            <p class="text-gray-400 text-sm">3 serviços rodando</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <h3 class="text-lg font-bold text-white mb-4">Ações Rápidas</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button class="bg-gray-700 hover:bg-gray-600 rounded-lg p-4 transition-colors flex flex-col items-center">
+                <i data-lucide="play" class="w-6 h-6 text-green-400 mb-2"></i>
+                <span class="text-sm text-white">Iniciar Container</span>
+            </button>
+            <button class="bg-gray-700 hover:bg-gray-600 rounded-lg p-4 transition-colors flex flex-col items-center">
+                <i data-lucide="square" class="w-6 h-6 text-red-400 mb-2"></i>
+                <span class="text-sm text-white">Parar Container</span>
+            </button>
+            <button class="bg-gray-700 hover:bg-gray-600 rounded-lg p-4 transition-colors flex flex-col items-center">
+                <i data-lucide="refresh-cw" class="w-6 h-6 text-blue-400 mb-2"></i>
+                <span class="text-sm text-white">Sincronizar HD</span>
+            </button>
+            <button class="bg-gray-700 hover:bg-gray-600 rounded-lg p-4 transition-colors flex flex-col items-center">
+                <i data-lucide="download" class="w-6 h-6 text-purple-400 mb-2"></i>
+                <span class="text-sm text-white">Criar Backup</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="mt-6 bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <h3 class="text-lg font-bold text-white mb-4">Atividade Recente</h3>
+        <div class="space-y-4">
+            <div class="flex items-center py-3 border-b border-gray-700">
+                <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center mr-4">
+                    <i data-lucide="check" class="w-5 h-5 text-green-400"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-white">Container jellyfin iniciado</p>
+                    <p class="text-gray-500 text-sm">Hoje, 14:32</p>
+                </div>
+            </div>
+            <div class="flex items-center py-3 border-b border-gray-700">
+                <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center mr-4">
+                    <i data-lucide="hard-drive" class="w-5 h-5 text-blue-400"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-white">HD externo montado</p>
+                    <p class="text-gray-500 text-sm">Hoje, 10:15</p>
+                </div>
+            </div>
+            <div class="flex items-center py-3">
+                <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center mr-4">
+                    <i data-lucide="archive" class="w-5 h-5 text-purple-400"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-white">Backup completado (daily)</p>
+                    <p class="text-gray-500 text-sm">Ontem, 23:00</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}
