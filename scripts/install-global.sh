@@ -17,7 +17,7 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Check if running from correct directory
 if [ ! -f "$PROJECT_DIR/$SCRIPT_NAME" ]; then
     echo "❌ ERROR: This script must be run from the control-panel directory"
-    echo "💡 Navigate to: /media/mateus/Servidor/scripts/control-panel"
+    echo "💡 Navigate to: /media/mateus/Servidor/projetos/pessoal/control-panel"
     exit 1
 fi
 
@@ -41,7 +41,7 @@ cat > "$PROJECT_DIR/$WRAPPER_NAME" << 'WRAPPEREOF'
 #!/usr/bin/env bash
 # control-panel wrapper - Auto-syncs scripts from HD when mounted
 
-PROJECT_DIR="/media/mateus/Servidor/scripts/control-panel"
+PROJECT_DIR="/media/mateus/Servidor/projetos/pessoal/control-panel"
 HOME_SCRIPTS_DIR="$HOME/scripts"
 
 # Auto-sync function - copies scripts from HD to ~/scripts/
@@ -56,8 +56,8 @@ auto_sync() {
             cp -p "$PROJECT_DIR/scripts/backup_daemon.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
             cp -p "$PROJECT_DIR/scripts/backup_manager.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
             # Also sync docker-compose.yml
-            if [ -f "/media/mateus/Servidor/scripts/docker-compose.yml" ]; then
-                cp -p "/media/mateus/Servidor/scripts/docker-compose.yml" "$HOME/" 2>/dev/null
+            if [ -f "/media/mateus/Servidor/projetos/pessoal/docker-compose.yml" ]; then
+                cp -p "/media/mateus/Servidor/projetos/pessoal/docker-compose.yml" "$HOME/" 2>/dev/null
             fi
             return 0
         fi
@@ -79,7 +79,7 @@ if [ ! -f "$HOME_SCRIPTS_DIR/cli_manager.py" ]; then
     echo "   1. Run: control-panel sync"
     echo "   2. Or manually copy:"
     echo "      mkdir -p ~/scripts"
-    echo "      cp /media/mateus/Servidor/scripts/control-panel/scripts/*.py ~/scripts/"
+    echo "      cp /media/mateus/Servidor/projetos/pessoal/control-panel/scripts/*.py ~/scripts/"
     exit 1
 fi
 

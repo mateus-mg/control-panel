@@ -68,7 +68,7 @@ class CLIManager:
             Path to project root directory
         """
         # Default fallback path
-        default_path = Path("/media/mateus/Servidor/scripts/control-panel")
+        default_path = Path("/media/mateus/Servidor/projetos/pessoal/control-panel")
         
         # Start from current file and search up
         current = Path(__file__).resolve()
@@ -1301,7 +1301,7 @@ class CLIManager:
             wrapper_content = '''#!/usr/bin/env bash
 # control-panel wrapper - Auto-syncs scripts from HD when mounted
 
-PROJECT_DIR="/media/mateus/Servidor/scripts/control-panel"
+PROJECT_DIR="/media/mateus/Servidor/projetos/pessoal/control-panel"
 HOME_SCRIPTS_DIR="$HOME/scripts"
 
 # Auto-sync function - copies scripts from HD to ~/scripts/
@@ -1315,8 +1315,8 @@ auto_sync() {
         cp -p "$PROJECT_DIR/scripts/backup_daemon.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
         cp -p "$PROJECT_DIR/scripts/backup_manager.py" "$HOME_SCRIPTS_DIR/" 2>/dev/null
         # Also sync docker-compose.yml
-        if [ -f "/media/mateus/Servidor/scripts/docker-compose.yml" ]; then
-            cp -p "/media/mateus/Servidor/scripts/docker-compose.yml" "$HOME/" 2>/dev/null
+        if [ -f "/media/mateus/Servidor/projetos/pessoal/docker-compose.yml" ]; then
+            cp -p "/media/mateus/Servidor/projetos/pessoal/docker-compose.yml" "$HOME/" 2>/dev/null
         fi
         return 0
     fi
@@ -1378,7 +1378,7 @@ exec python3 "$HOME_SCRIPTS_DIR/cli_manager.py" "$@"
 
             # Copy docker-compose.yml from HD to home directory
             source_docker_compose = Path(
-                "/media/mateus/Servidor/scripts/docker-compose.yml")
+                "/media/mateus/Servidor/projetos/pessoal/docker-compose.yml")
             dest_docker_compose = os.path.expanduser("~/docker-compose.yml")
 
             if source_docker_compose.exists():

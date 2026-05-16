@@ -101,7 +101,7 @@ Hybrid Bash/Python home server management system. Manages external HD mounts, Do
 
 ### Auto-Sync Architecture
 The `control-panel` wrapper performs auto-sync on every invocation:
-1. Check if HD mounted at `/media/mateus/Servidor/scripts/control-panel/`
+1. Check if HD mounted at `/media/mateus/Servidor/projetos/pessoal/control-panel/`
 2. Copy `.py` files from HD to `~/scripts/`
 3. Activate venv, delegate to Python CLI
 

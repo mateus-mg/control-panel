@@ -131,7 +131,7 @@ class BackupConfigManager:
                 },
                 {
                     "id": "src_002",
-                    "path": "/media/mateus/Servidor/scripts",
+                    "path": "/media/mateus/Servidor/projetos/pessoal",
                     "recursive": True,
                     "enabled": True,
                     "added_at": datetime.now().isoformat(),
