@@ -72,7 +72,7 @@
 HD_MOUNT_POINT="/media/mateus/Servidor"
 DOCKER_COMPOSE_DIR="/home/mateus"
 DOCKER_COMPOSE_FILE="$DOCKER_COMPOSE_DIR/docker-compose.yml"
-ORIGINAL_DOCKER_COMPOSE_FILE="/media/mateus/Servidor/scripts/docker-compose.yml"
+ORIGINAL_DOCKER_COMPOSE_FILE="/media/mateus/Servidor/projetos/pessoal/docker-compose.yml"
 LOG_FILE="$HOME/.control-panel.log"
 WRAPPER_NAME="control-panel"
 LOCAL_BIN_DIR="$HOME/.local/bin"
